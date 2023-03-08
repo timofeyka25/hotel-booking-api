@@ -8,6 +8,7 @@ type User struct {
 	Email    string
 	Password string
 	RoleId   uuid.UUID
+	IsActive bool
 }
 
 func NewUser(
@@ -21,5 +22,6 @@ func NewUser(
 		Email:    email,
 		Password: password,
 		RoleId:   uuid.MustParse(roleId),
+		IsActive: true,
 	}
 }

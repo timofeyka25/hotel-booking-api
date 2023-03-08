@@ -32,7 +32,7 @@ func (dao reservationDAO) Read(id uuid.UUID) (*domain.Reservation, error) {
 	var r domain.Reservation
 
 	err := dao.db.QueryRow("SELECT * FROM reservations WHERE id = $1", id).
-		Scan(&r.Id, &r.UserId, &r.RoomId, &r.CheckInDate, &r.CheckOutDate, &r.Status)
+		Scan(&r.Id, &r.UserId, &r.RoomId, &r.CheckInDate, &r.CheckOutDate, &r.Status, &r.PaymentStatus)
 	if err == sql.ErrNoRows {
 		return nil, nil
 	} else if err != nil {
@@ -44,7 +44,8 @@ func (dao reservationDAO) Read(id uuid.UUID) (*domain.Reservation, error) {
 
 func (dao reservationDAO) Update(r domain.Reservation) error {
 	_, err := dao.db.Exec("UPDATE reservations SET user_id = $2, room_id = $3, check_in_date = $4, check_out_date = $5, "+
-		"status = $6 WHERE id = $1", r.Id, r.UserId, r.RoomId, r.CheckInDate, r.CheckOutDate, r.Status)
+		"status = $6, payment_status = $7 WHERE id = $1",
+		r.Id, r.UserId, r.RoomId, r.CheckInDate, r.CheckOutDate, r.Status, r.PaymentStatus)
 
 	return err
 }
