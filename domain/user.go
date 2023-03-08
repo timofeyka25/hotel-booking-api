@@ -1,0 +1,25 @@
+package domain
+
+import "github.com/google/uuid"
+
+type User struct {
+	Id       uuid.UUID
+	Name     string
+	Email    string
+	Password string
+	RoleId   uuid.UUID
+}
+
+func NewUser(
+	name string,
+	email string,
+	password string,
+	roleId string) User {
+	return User{
+		Id:       uuid.New(),
+		Name:     name,
+		Email:    email,
+		Password: password,
+		RoleId:   uuid.MustParse(roleId),
+	}
+}
