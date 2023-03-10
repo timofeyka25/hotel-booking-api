@@ -3,7 +3,7 @@ package domain
 import "github.com/google/uuid"
 
 type Hotel struct {
-	Id          uuid.UUID
+	Id          uuid.UUID `bun:",pk"`
 	Name        string
 	Location    string
 	Description string

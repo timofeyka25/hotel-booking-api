@@ -6,7 +6,7 @@ import (
 )
 
 type Payment struct {
-	Id            uuid.UUID
+	Id            uuid.UUID `bun:",pk"`
 	ReservationId uuid.UUID
 	UserId        uuid.UUID
 	Amount        float64

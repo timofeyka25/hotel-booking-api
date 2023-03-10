@@ -3,7 +3,7 @@ package domain
 import "github.com/google/uuid"
 
 type Room struct {
-	Id            uuid.UUID
+	Id            uuid.UUID `bun:",pk"`
 	HotelId       uuid.UUID
 	RoomType      string
 	MaxOccupancy  int

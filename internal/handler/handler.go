@@ -12,4 +12,5 @@ func NewHandler(uh *UserHandler) *handler {
 
 func (h *handler) InitRoutes(app *fiber.App) {
 	app.Get("/sign-in", h.uh.SignIn)
+	app.Post("/sign-up", h.uh.SignUp)
 }

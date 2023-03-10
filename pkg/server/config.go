@@ -2,16 +2,13 @@ package server
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"os"
 	"strconv"
 	"time"
 )
 
-type Config struct {
-	ReadTimeout string `env:"SERVER_READ_TIMEOUT" envDefault:"10"`
-}
-
-func FiberConfig(cfg Config) fiber.Config {
-	readTimeoutSecondsCount, _ := strconv.Atoi(cfg.ReadTimeout)
+func FiberConfig() fiber.Config {
+	readTimeoutSecondsCount, _ := strconv.Atoi(os.Getenv("SERVER_READ_TIMEOUT"))
 
 	return fiber.Config{
 		ReadTimeout: time.Second * time.Duration(readTimeoutSecondsCount),

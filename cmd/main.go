@@ -1,37 +1,80 @@
 package main
 
 import (
-	"hotel-booking-app/dao"
-	"hotel-booking-app/handler"
-	"hotel-booking-app/pkg/db"
+	"fmt"
+	"github.com/joho/godotenv"
+	"github.com/pkg/errors"
+	"hotel-booking-app/internal/dao"
+	"hotel-booking-app/internal/handler"
+	"hotel-booking-app/internal/usecase"
+	database "hotel-booking-app/pkg/db"
+	"hotel-booking-app/pkg/jwt"
 	"hotel-booking-app/pkg/server"
-	"hotel-booking-app/usecase"
+	"hotel-booking-app/pkg/validator"
+	"io"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
-	dbInstance, err := db.NewDB(db.Config{
-		Username: "timofeyka.com.03",
-		Password: "5jZF7HxWAXob",
-		DbName:   "hotelbookingdb",
-		Host:     "ep-ancient-term-974725-pooler.eu-central-1.aws.neon.tech",
-	})
+	// load env variables
+	err := godotenv.Load(".env")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Error loading .env file")
 	}
-	log.Println("Connected to db")
 
-	app := server.NewHTTPServer(server.Config{ReadTimeout: "10"})
-	userHandler := handler.NewUserHandler(usecase.NewUserUseCase(dao.NewUserDAO(dbInstance)))
+	db, err := database.NewDB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer closeDB(db)
+
+	// init helpers
+	jwtGenerator := jwt.NewTokenGenerator(jwt.Config{SecretKey: os.Getenv("JWT_SECRET_KEY")})
+	/*jwtValidator*/ _ = jwt.NewTokenValidator(jwt.Config{SecretKey: os.Getenv("JWT_SECRET_KEY")})
+	validate := validator.NewValidator()
+
+	// init dao
+	userDao := dao.NewUserDAO(db)
+
+	// init use cases
+	userUseCase := usecase.NewUserUseCase(userDao, jwtGenerator)
+
+	// init handlers
+	userHandler := handler.NewUserHandler(userUseCase, validate)
 	handlers := handler.NewHandler(userHandler)
+
+	// init app
+	app := server.NewHTTPServer()
 	handlers.InitRoutes(app)
-	err = app.Listen(":8000")
-	if err != nil {
-		log.Fatal(err)
+
+	// run app
+	go func() {
+		err = app.Listen(fmt.Sprintf("%s:%s", os.Getenv("SERVER_HOST"), os.Getenv("SERVER_PORT")))
+		if err != nil {
+			log.Println("Server unexpectedly stopped")
+		}
+	}()
+
+	// shutdown app and db
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, os.Interrupt)
+	signal.Notify(stop, syscall.SIGTERM)
+	<-stop
+
+	if err = app.Shutdown(); err != nil {
+		log.Printf("error shutting down server %s", err)
+	} else {
+		log.Println("Server gracefully stopped")
 	}
-	err = dbInstance.Close()
-	if err != nil {
-		log.Fatal(err)
+}
+
+func closeDB(db io.Closer) {
+	if err := db.Close(); err != nil {
+		log.Println(errors.Wrap(err, "err closing db connection"))
+	} else {
+		log.Println("db connection gracefully closed")
 	}
-	log.Println("Disconnected from db")
 }

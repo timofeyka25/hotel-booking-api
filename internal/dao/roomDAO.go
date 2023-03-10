@@ -3,7 +3,7 @@ package dao
 import (
 	"database/sql"
 	"github.com/google/uuid"
-	"hotel-booking-app/domain"
+	"hotel-booking-app/internal/domain"
 )
 
 type RoomDAO interface {

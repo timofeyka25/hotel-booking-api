@@ -16,7 +16,7 @@ const (
 )
 
 type Reservation struct {
-	Id            uuid.UUID
+	Id            uuid.UUID `bun:",pk"`
 	UserId        uuid.UUID
 	RoomId        uuid.UUID
 	CheckInDate   time.Time
