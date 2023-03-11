@@ -12,6 +12,7 @@ import (
 type HotelDAO interface {
 	Create(context.Context, *domain.Hotel) error
 	GetById(context.Context, uuid.UUID) (*domain.Hotel, error)
+	GetAll(context.Context) ([]*domain.Hotel, error)
 	Update(context.Context, *domain.Hotel) error
 	Delete(context.Context, uuid.UUID) error
 }
@@ -45,6 +46,13 @@ func (dao hotelDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Hotel, e
 		return nil, err
 	}
 	return hotel, nil
+}
+
+func (dao hotelDAO) GetAll(ctx context.Context) ([]*domain.Hotel, error) {
+	var hotels []*domain.Hotel
+	err := dao.db.NewSelect().Model(&hotels).Scan(ctx)
+
+	return hotels, err
 }
 
 func (dao hotelDAO) Update(ctx context.Context, hotel *domain.Hotel) error {

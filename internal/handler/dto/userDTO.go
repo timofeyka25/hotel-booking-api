@@ -8,8 +8,7 @@ type SignInRequestDTO struct {
 }
 
 type SignInResponseDTO struct {
-	Token   string `json:"token,omitempty"`
-	Message string `json:"message,omitempty"`
+	Token string `json:"token,omitempty"`
 }
 
 type SignUpRequestDTO struct {
@@ -19,6 +18,5 @@ type SignUpRequestDTO struct {
 }
 
 type SignUpResponseDTO struct {
-	Id      uuid.UUID `json:"id,omitempty"`
-	Message string    `json:"message,omitempty"`
+	Id uuid.UUID `json:"id,omitempty"`
 }

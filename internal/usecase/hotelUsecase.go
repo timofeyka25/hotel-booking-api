@@ -9,6 +9,10 @@ import (
 
 type HotelUseCase interface {
 	AddHotel(context.Context, AddHotelParams) (uuid.UUID, error)
+	GetAllHotels(context.Context) ([]*domain.Hotel, error)
+	GetHotelById(context.Context, uuid.UUID) (*domain.Hotel, error)
+	UpdateHotel(context.Context, UpdateHotelParams) error
+	DeleteHotel(context.Context, uuid.UUID) error
 }
 
 type hotelUseCase struct {
@@ -19,16 +23,52 @@ func NewHotelUseCase(hotelDAO dao.HotelDAO) *hotelUseCase {
 	return &hotelUseCase{hotelDAO: hotelDAO}
 }
 
-func (h hotelUseCase) AddHotel(ctx context.Context, params AddHotelParams) (uuid.UUID, error) {
+func (uc hotelUseCase) AddHotel(ctx context.Context, params AddHotelParams) (uuid.UUID, error) {
 	hotel := domain.NewHotel(params.Name, params.Location, params.Description)
-	if err := h.hotelDAO.Create(ctx, hotel); err != nil {
+	if err := uc.hotelDAO.Create(ctx, hotel); err != nil {
 		return uuid.Nil, err
 	}
 	return hotel.Id, nil
+}
+
+func (uc hotelUseCase) GetAllHotels(ctx context.Context) ([]*domain.Hotel, error) {
+	return uc.hotelDAO.GetAll(ctx)
+}
+
+func (uc hotelUseCase) GetHotelById(ctx context.Context, id uuid.UUID) (*domain.Hotel, error) {
+	return uc.hotelDAO.GetById(ctx, id)
+}
+
+func (uc hotelUseCase) UpdateHotel(ctx context.Context, params UpdateHotelParams) error {
+	hotel, err := uc.hotelDAO.GetById(ctx, params.Id)
+	if err != nil {
+		return err
+	}
+	if params.Name != nil {
+		hotel.Name = *params.Name
+	}
+	if params.Location != nil {
+		hotel.Location = *params.Location
+	}
+	if params.Description != nil {
+		hotel.Description = *params.Description
+	}
+	return uc.hotelDAO.Update(ctx, hotel)
+}
+
+func (uc hotelUseCase) DeleteHotel(ctx context.Context, id uuid.UUID) error {
+	return uc.hotelDAO.Delete(ctx, id)
 }
 
 type AddHotelParams struct {
 	Name        string
 	Location    string
 	Description string
+}
+
+type UpdateHotelParams struct {
+	Id          uuid.UUID
+	Name        *string
+	Location    *string
+	Description *string
 }
