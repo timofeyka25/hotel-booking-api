@@ -8,19 +8,44 @@ import (
 )
 
 func toSignUpParams(dto *dto.SignUpRequestDTO) usecase.SignUpParams {
-	return usecase.SignUpParams{Name: dto.Name, Email: dto.Email, Password: dto.Password}
+	return usecase.SignUpParams{
+		Name:     dto.Name,
+		Email:    dto.Email,
+		Password: dto.Password,
+	}
 }
 
 func toSignInParams(dto *dto.SignInRequestDTO) usecase.SignInParams {
-	return usecase.SignInParams{Email: dto.Email, Password: dto.Password}
+	return usecase.SignInParams{
+		Email:    dto.Email,
+		Password: dto.Password,
+	}
 }
 
-func toAddHotelParams(dto *dto.AddHotelReqDTO) usecase.AddHotelParams {
-	return usecase.AddHotelParams{Name: dto.Name, Location: dto.Location, Description: dto.Description}
+func toAddHotelParams(dto *dto.AddHotelDTO) usecase.AddHotelParams {
+	return usecase.AddHotelParams{
+		Name:        dto.Name,
+		Location:    dto.Location,
+		Description: dto.Description,
+	}
+}
+
+func toAddRoomParams(id uuid.UUID, dto *dto.AddRoomDTO) usecase.AddRoomParams {
+	return usecase.AddRoomParams{
+		HotelId:       id,
+		RoomType:      dto.RoomType,
+		MaxOccupancy:  dto.MaxOccupancy,
+		PricePerNight: dto.PricePerNight,
+	}
 }
 
 func toUpdateHotelParams(id uuid.UUID, dto *dto.UpdateHotelDTO) usecase.UpdateHotelParams {
-	return usecase.UpdateHotelParams{Id: id, Name: dto.Name, Location: dto.Location, Description: dto.Description}
+	return usecase.UpdateHotelParams{
+		Id:          id,
+		Name:        dto.Name,
+		Location:    dto.Location,
+		Description: dto.Description,
+	}
 }
 
 func mapDtoHotel(hotel *domain.Hotel) *dto.HotelDTO {
@@ -38,4 +63,22 @@ func mapDtoHotels(hotels []*domain.Hotel) []*dto.HotelDTO {
 		dtoHotels = append(dtoHotels, mapDtoHotel(hotel))
 	}
 	return dtoHotels
+}
+
+func mapDtoRoom(room *domain.Room) *dto.RoomDTO {
+	return &dto.RoomDTO{
+		Id:            room.Id,
+		Hotel:         mapDtoHotel(room.Hotel),
+		RoomType:      room.RoomType,
+		MaxOccupancy:  room.MaxOccupancy,
+		PricePerNight: room.PricePerNight,
+	}
+}
+
+func mapDtoRooms(rooms []*domain.Room) []*dto.RoomDTO {
+	var dtoRooms []*dto.RoomDTO
+	for _, room := range rooms {
+		dtoRooms = append(dtoRooms, mapDtoRoom(room))
+	}
+	return dtoRooms
 }

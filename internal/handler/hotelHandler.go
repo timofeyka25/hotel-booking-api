@@ -18,7 +18,7 @@ func NewHotelHandler(hotelUseCase usecase.HotelUseCase, validator *validator.Val
 }
 
 func (h *HotelHandler) AddHotel(ctx *fiber.Ctx) error {
-	addHotelDTO := new(dto.AddHotelReqDTO)
+	addHotelDTO := new(dto.AddHotelDTO)
 	if err := ctx.BodyParser(addHotelDTO); err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
 	}
@@ -29,7 +29,7 @@ func (h *HotelHandler) AddHotel(ctx *fiber.Ctx) error {
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
 	}
-	return ctx.Status(fiber.StatusCreated).JSON(dto.AddHotelResDTO{Id: id})
+	return ctx.Status(fiber.StatusCreated).JSON(dto.ReturnIdDTO{Id: id})
 }
 
 func (h *HotelHandler) GetAllHotels(ctx *fiber.Ctx) error {

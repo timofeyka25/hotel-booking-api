@@ -5,6 +5,7 @@ import "github.com/google/uuid"
 type Room struct {
 	Id            uuid.UUID `bun:",pk"`
 	HotelId       uuid.UUID
+	Hotel         *Hotel `bun:"rel:belongs-to"`
 	RoomType      string
 	MaxOccupancy  int
 	PricePerNight float64

@@ -12,6 +12,7 @@ import (
 type RoomDAO interface {
 	Create(context.Context, *domain.Room) error
 	GetById(context.Context, uuid.UUID) (*domain.Room, error)
+	GetByHotelId(context.Context, uuid.UUID) ([]*domain.Room, error)
 	Update(context.Context, *domain.Room) error
 	Delete(context.Context, uuid.UUID) error
 }
@@ -39,12 +40,20 @@ func (dao roomDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Room, err
 
 	err := dao.db.NewSelect().
 		Model(room).
-		Where("id = ?", id).
+		Where("room.id = ?", id).
+		Relation("Hotel").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return room, nil
+}
+
+func (dao roomDAO) GetByHotelId(ctx context.Context, hotelId uuid.UUID) ([]*domain.Room, error) {
+	var rooms []*domain.Room
+	err := dao.db.NewSelect().Model(&rooms).Where("hotel_id = ?", hotelId).Relation("Hotel").Scan(ctx)
+
+	return rooms, err
 }
 
 func (dao roomDAO) Update(ctx context.Context, room *domain.Room) error {

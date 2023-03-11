@@ -75,5 +75,5 @@ func (h UserHandler) SignUp(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
 	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(dto.SignUpResponseDTO{Id: id})
+	return ctx.Status(fiber.StatusCreated).JSON(dto.ReturnIdDTO{Id: id})
 }
