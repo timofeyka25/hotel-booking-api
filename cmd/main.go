@@ -25,6 +25,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
+	// init db
 	db, err := database.NewDB()
 	if err != nil {
 		log.Fatal(err)
@@ -33,7 +34,7 @@ func main() {
 
 	// init helpers
 	jwtGenerator := jwt.NewTokenGenerator(jwt.Config{SecretKey: os.Getenv("JWT_SECRET_KEY")})
-	/*jwtValidator*/ _ = jwt.NewTokenValidator(jwt.Config{SecretKey: os.Getenv("JWT_SECRET_KEY")})
+	jwtValidator := jwt.NewTokenValidator(jwt.Config{SecretKey: os.Getenv("JWT_SECRET_KEY")})
 	validate := validator.NewValidator()
 
 	// init dao
@@ -47,7 +48,7 @@ func main() {
 	handlers := handler.NewHandler(userHandler)
 
 	// init app
-	app := server.NewHTTPServer()
+	app := server.NewHTTPServer(jwtValidator)
 	handlers.InitRoutes(app)
 
 	// run app

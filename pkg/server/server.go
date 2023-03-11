@@ -6,13 +6,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v2/middleware/skip"
 	"hotel-booking-app/pkg/jwt"
-	"os"
 	"regexp"
 )
 
-func NewHTTPServer() *fiber.App {
+func NewHTTPServer(jwtValidator *jwt.TokenValidator) *fiber.App {
 	app := fiber.New(FiberConfig())
-	jwtValidator := jwt.NewTokenValidator(jwt.Config{SecretKey: os.Getenv("SECRET_KEY")})
 	validatorMiddleware := NewTokenValidatorMiddleware(jwtValidator)
 	app.Use(
 		cors.New(cors.Config{
