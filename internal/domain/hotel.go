@@ -9,8 +9,8 @@ type Hotel struct {
 	Description string
 }
 
-func NewHotel(name, location, description string) Hotel {
-	return Hotel{
+func NewHotel(name, location, description string) *Hotel {
+	return &Hotel{
 		Id:          uuid.New(),
 		Name:        name,
 		Location:    location,

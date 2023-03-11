@@ -14,8 +14,8 @@ func NewRoom(
 	hotelId uuid.UUID,
 	roomType string,
 	maxOccupancy int,
-	pricePerNight float64) Room {
-	return Room{
+	pricePerNight float64) *Room {
+	return &Room{
 		Id:            uuid.New(),
 		HotelId:       hotelId,
 		RoomType:      roomType,

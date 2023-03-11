@@ -14,9 +14,10 @@ type Payment struct {
 }
 
 func NewPayment(
-	reservationId, userId uuid.UUID,
-	amount float64) Payment {
-	return Payment{
+	reservationId,
+	userId uuid.UUID,
+	amount float64) *Payment {
+	return &Payment{
 		Id:            uuid.New(),
 		ReservationId: reservationId,
 		UserId:        userId,

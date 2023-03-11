@@ -7,8 +7,8 @@ type Role struct {
 	Name string
 }
 
-func NewRole(name string) Role {
-	return Role{Id: uuid.New(), Name: name}
+func NewRole(name string) *Role {
+	return &Role{Id: uuid.New(), Name: name}
 }
 
 const (

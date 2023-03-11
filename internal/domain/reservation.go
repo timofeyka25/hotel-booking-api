@@ -28,8 +28,8 @@ type Reservation struct {
 func NewReservation(
 	userId, roomId string,
 	CheckInDate, CheckOutDate time.Time,
-	status, paymentStatus string) Reservation {
-	return Reservation{
+	status, paymentStatus string) *Reservation {
+	return &Reservation{
 		Id:            uuid.New(),
 		UserId:        uuid.MustParse(userId),
 		RoomId:        uuid.MustParse(roomId),
