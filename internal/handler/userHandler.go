@@ -8,12 +8,12 @@ import (
 )
 
 type UserHandler struct {
-	validator *validator.Validate
-	uc        usecase.UserUseCase
+	validator   *validator.Validate
+	userUseCase usecase.UserUseCase
 }
 
-func NewUserHandler(uc usecase.UserUseCase, v *validator.Validate) *UserHandler {
-	return &UserHandler{uc: uc, validator: v}
+func NewUserHandler(userUseCase usecase.UserUseCase, validator *validator.Validate) *UserHandler {
+	return &UserHandler{userUseCase: userUseCase, validator: validator}
 }
 
 func (h UserHandler) SignIn(ctx *fiber.Ctx) error {
@@ -24,12 +24,12 @@ func (h UserHandler) SignIn(ctx *fiber.Ctx) error {
 	if err := h.validator.Struct(signInDto); err != nil {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.SignInResponseDTO{Message: err.Error()})
 	}
-	token, err := h.uc.SignIn(ctx.Context(), toSignInParams(signInDto))
+	token, err := h.userUseCase.SignIn(ctx.Context(), toSignInParams(signInDto))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.SignInResponseDTO{Message: err.Error()})
 	}
 
-	user, err := h.uc.GetUser(ctx.Context(), signInDto.Email)
+	user, err := h.userUseCase.GetUser(ctx.Context(), signInDto.Email)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.SignInResponseDTO{Message: err.Error()})
 	}
@@ -50,10 +50,10 @@ func (h UserHandler) SignUp(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusBadRequest).JSON(dto.SignUpResponseDTO{Message: err.Error()})
 	}
 
-	id, err := h.uc.SignUp(ctx.Context(), toSignUpParams(signUpDto))
+	id, err := h.userUseCase.SignUp(ctx.Context(), toSignUpParams(signUpDto))
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.SignUpResponseDTO{Message: err.Error()})
 	}
 
-	return ctx.JSON(dto.SignUpResponseDTO{Id: id})
+	return ctx.Status(fiber.StatusCreated).JSON(dto.SignUpResponseDTO{Id: id})
 }

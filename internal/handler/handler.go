@@ -3,14 +3,16 @@ package handler
 import "github.com/gofiber/fiber/v2"
 
 type handler struct {
-	uh *UserHandler
+	userHandler  *UserHandler
+	hotelHandler *HotelHandler
 }
 
-func NewHandler(uh *UserHandler) *handler {
-	return &handler{uh: uh}
+func NewHandler(userHandler *UserHandler, hotelHandler *HotelHandler) *handler {
+	return &handler{userHandler: userHandler, hotelHandler: hotelHandler}
 }
 
 func (h *handler) InitRoutes(app *fiber.App) {
-	app.Get("/sign-in", h.uh.SignIn)
-	app.Post("/sign-up", h.uh.SignUp)
+	app.Get("/sign-in", h.userHandler.SignIn)
+	app.Post("/sign-up", h.userHandler.SignUp)
+	app.Post("/hotel", h.hotelHandler.AddHotel)
 }

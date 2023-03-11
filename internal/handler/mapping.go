@@ -12,3 +12,7 @@ func toSignUpParams(dto *dto.SignUpRequestDTO) usecase.SignUpParams {
 func toSignInParams(dto *dto.SignInRequestDTO) usecase.SignInParams {
 	return usecase.SignInParams{Email: dto.Email, Password: dto.Password}
 }
+
+func toAddHotelParams(dto *dto.AddHotelReqDTO) usecase.AddHotelParams {
+	return usecase.AddHotelParams{Name: dto.Name, Location: dto.Location, Description: dto.Description}
+}
