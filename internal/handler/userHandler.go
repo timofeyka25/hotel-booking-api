@@ -16,6 +16,16 @@ func NewUserHandler(userUseCase usecase.UserUseCase, validator *validator.Valida
 	return &UserHandler{userUseCase: userUseCase, validator: validator}
 }
 
+// SignIn
+//
+//	@Summary	Sign in to account
+//	@Tags		Authentication
+//	@Accept		json
+//	@Param		input	body dto.SignInRequestDTO true "User credentials"
+//	@Success	200		{object}	dto.SignInResponseDTO
+//	@Failure	400		{object}	dto.ErrorDTO
+//	@Failure	500		{object}	dto.ErrorDTO
+//	@Router		/sign-in [post]
 func (h UserHandler) SignIn(ctx *fiber.Ctx) error {
 	signInDto := new(dto.SignInRequestDTO)
 	if err := ctx.BodyParser(signInDto); err != nil {
@@ -41,6 +51,16 @@ func (h UserHandler) SignIn(ctx *fiber.Ctx) error {
 	return ctx.JSON(dto.SignInResponseDTO{Token: token})
 }
 
+// SignUp
+//
+//	@Summary	Sign up into account
+//	@Tags		Authentication
+//	@Accept		json
+//	@Param		input body dto.SignUpRequestDTO	true "User credentials"
+//	@Success	200 {object}	dto.SignUpResponseDTO
+//	@Failure	400	{object}	dto.ErrorDTO
+//	@Failure	500	{object}	dto.ErrorDTO
+//	@Router		/sign-up [post]
 func (h UserHandler) SignUp(ctx *fiber.Ctx) error {
 	signUpDto := new(dto.SignUpRequestDTO)
 	if err := ctx.BodyParser(signUpDto); err != nil {

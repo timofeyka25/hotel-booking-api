@@ -1,0 +1,104 @@
+basePath: /
+definitions:
+  hotel-booking-app_internal_handler_dto.ErrorDTO:
+    properties:
+      message:
+        type: string
+    type: object
+  hotel-booking-app_internal_handler_dto.SignInRequestDTO:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 255
+        minLength: 6
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  hotel-booking-app_internal_handler_dto.SignInResponseDTO:
+    properties:
+      token:
+        type: string
+    type: object
+  hotel-booking-app_internal_handler_dto.SignUpRequestDTO:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        maxLength: 255
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  hotel-booking-app_internal_handler_dto.SignUpResponseDTO:
+    properties:
+      id:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  title: Backend API
+paths:
+  /sign-in:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SignInRequestDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SignInResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Sign in to account
+      tags:
+      - Authentication
+  /sign-up:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User credentials
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SignUpRequestDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SignUpResponseDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Sign up into account
+      tags:
+      - Authentication
+swagger: "2.0"

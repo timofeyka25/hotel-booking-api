@@ -18,6 +18,10 @@ import (
 	"syscall"
 )
 
+//	@title		Backend API
+//	@host		localhost:8000
+//	@BasePath	/
+
 func main() {
 	// load env variables
 	err := godotenv.Load(".env")
