@@ -1,57 +1,62 @@
 package dao
 
 import (
-	"database/sql"
+	"context"
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/driver/pgdriver"
 	"hotel-booking-app/internal/domain"
+	"hotel-booking-app/pkg/customErrors"
 )
 
 type ReservationDAO interface {
-	Create(domain.Reservation) error
-	Read(uuid.UUID) (*domain.Reservation, error)
-	Update(domain.Reservation) error
-	Delete(uuid.UUID) error
+	Create(context.Context, *domain.Reservation) error
+	GetById(context.Context, uuid.UUID) (*domain.Reservation, error)
+	Update(context.Context, *domain.Reservation) error
+	Delete(context.Context, uuid.UUID) error
 }
 
 type reservationDAO struct {
-	db *sql.DB
+	db *bun.DB
 }
 
-func NewReservationDAO(db *sql.DB) *reservationDAO {
+func NewReservationDAO(db *bun.DB) *reservationDAO {
 	return &reservationDAO{db: db}
 }
 
-func (dao reservationDAO) Create(r domain.Reservation) error {
-	_, err := dao.db.Exec("INSERT INTO reservations (id, user_id, room_id, check_in_date, check_out_date, status)"+
-		" VALUES ($1, $2, $3, $4, $5, $6)", r.Id, r.UserId, r.RoomId, r.CheckInDate, r.CheckOutDate, r.Status)
+func (dao reservationDAO) Create(ctx context.Context, r *domain.Reservation) error {
+	_, err := dao.db.NewInsert().Model(r).Exec(ctx)
 
-	return err
-}
-
-func (dao reservationDAO) Read(id uuid.UUID) (*domain.Reservation, error) {
-	var r domain.Reservation
-
-	err := dao.db.QueryRow("SELECT * FROM reservations WHERE id = $1", id).
-		Scan(&r.Id, &r.UserId, &r.RoomId, &r.CheckInDate, &r.CheckOutDate, &r.Status, &r.PaymentStatus)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	} else if err != nil {
-		return nil, err
+	if e, ok := err.(pgdriver.Error); ok && e.IntegrityViolation() {
+		return customErrors.NewAlreadyExistsError("reservation already exists")
 	}
 
-	return &r, nil
+	return err
 }
 
-func (dao reservationDAO) Update(r domain.Reservation) error {
-	_, err := dao.db.Exec("UPDATE reservations SET user_id = $2, room_id = $3, check_in_date = $4, check_out_date = $5, "+
-		"status = $6, payment_status = $7 WHERE id = $1",
-		r.Id, r.UserId, r.RoomId, r.CheckInDate, r.CheckOutDate, r.Status, r.PaymentStatus)
+func (dao reservationDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Reservation, error) {
+	r := new(domain.Reservation)
+
+	err := dao.db.NewSelect().
+		Model(r).
+		Where("id = ?", id).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (dao reservationDAO) Update(ctx context.Context, r *domain.Reservation) error {
+	_, err := dao.db.NewUpdate().Model(r).Where("id = ?", r.Id).Exec(ctx)
 
 	return err
 }
 
-func (dao reservationDAO) Delete(id uuid.UUID) error {
-	_, err := dao.db.Exec("DELETE FROM reservations WHERE id = $1", id)
+func (dao reservationDAO) Delete(ctx context.Context, id uuid.UUID) error {
+	r := new(domain.Reservation)
+	r.Id = id
+	_, err := dao.db.NewDelete().Model(r).WherePK().Exec(ctx)
 
 	return err
 }

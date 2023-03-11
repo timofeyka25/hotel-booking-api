@@ -1,52 +1,76 @@
 package dao
 
 import (
-	"database/sql"
+	"context"
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/driver/pgdriver"
 	"hotel-booking-app/internal/domain"
+	"hotel-booking-app/pkg/customErrors"
 )
 
 type RoleDAO interface {
-	Create(domain.Role) error
-	Read(uuid.UUID) (*domain.Role, error)
-	Update(domain.Role) error
-	Delete(uuid.UUID) error
+	Create(context.Context, *domain.Role) error
+	GetById(context.Context, uuid.UUID) (*domain.Role, error)
+	GetByName(context.Context, string) (*domain.Role, error)
+	Update(context.Context, *domain.Role) error
+	Delete(context.Context, uuid.UUID) error
 }
 
 type roleDAO struct {
-	db *sql.DB
+	db *bun.DB
 }
 
-func NewRoleDAO(db *sql.DB) *roleDAO {
+func NewRoleDAO(db *bun.DB) *roleDAO {
 	return &roleDAO{db: db}
 }
 
-func (dao roleDAO) Create(role domain.Role) error {
-	_, err := dao.db.Exec("INSERT INTO roles (id, name) VALUES ($1, $2)", role.Id, role.Name)
+func (dao roleDAO) Create(ctx context.Context, role *domain.Role) error {
+	_, err := dao.db.NewInsert().Model(role).Exec(ctx)
 
-	return err
-}
-
-func (dao roleDAO) Read(id uuid.UUID) (*domain.Role, error) {
-	var r domain.Role
-	err := dao.db.QueryRow("SELECT * FROM roles WHERE id = $1", id).Scan(&r.Id, &r.Name)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	} else if err != nil {
-		return nil, err
+	if e, ok := err.(pgdriver.Error); ok && e.IntegrityViolation() {
+		return customErrors.NewAlreadyExistsError("role already exists")
 	}
 
-	return &r, nil
+	return err
 }
 
-func (dao roleDAO) Update(role domain.Role) error {
-	_, err := dao.db.Exec("UPDATE roles SET name = $2 WHERE id = $1", role.Id, role.Name)
+func (dao roleDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Role, error) {
+	role := new(domain.Role)
+
+	err := dao.db.NewSelect().
+		Model(role).
+		Where("id = ?", id).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return role, nil
+}
+
+func (dao roleDAO) GetByName(ctx context.Context, name string) (*domain.Role, error) {
+	role := new(domain.Role)
+
+	err := dao.db.NewSelect().
+		Model(role).
+		Where("name = ?", name).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return role, nil
+}
+
+func (dao roleDAO) Update(ctx context.Context, role *domain.Role) error {
+	_, err := dao.db.NewUpdate().Model(role).Where("id = ?", role.Id).Exec(ctx)
 
 	return err
 }
 
-func (dao roleDAO) Delete(id uuid.UUID) error {
-	_, err := dao.db.Exec("DELETE FROM roles WHERE id = $1", id)
+func (dao roleDAO) Delete(ctx context.Context, id uuid.UUID) error {
+	role := new(domain.Role)
+	role.Id = id
+	_, err := dao.db.NewDelete().Model(role).WherePK().Exec(ctx)
 
 	return err
 }

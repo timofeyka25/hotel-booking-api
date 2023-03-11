@@ -1,56 +1,62 @@
 package dao
 
 import (
-	"database/sql"
+	"context"
 	"github.com/google/uuid"
+	"github.com/uptrace/bun"
+	"github.com/uptrace/bun/driver/pgdriver"
 	"hotel-booking-app/internal/domain"
+	"hotel-booking-app/pkg/customErrors"
 )
 
 type RoomDAO interface {
-	Create(domain.Room) error
-	Read(uuid.UUID) (*domain.Room, error)
-	Update(domain.Room) error
-	Delete(uuid.UUID) error
+	Create(context.Context, *domain.Room) error
+	GetById(context.Context, uuid.UUID) (*domain.Room, error)
+	Update(context.Context, *domain.Room) error
+	Delete(context.Context, uuid.UUID) error
 }
 
 type roomDAO struct {
-	db *sql.DB
+	db *bun.DB
 }
 
-func NewRoomDAO(db *sql.DB) *roomDAO {
+func NewRoomDAO(db *bun.DB) *roomDAO {
 	return &roomDAO{db: db}
 }
 
-func (dao roomDAO) Create(room domain.Room) error {
-	_, err := dao.db.Exec("INSERT INTO rooms (id, hotel_id, room_type, max_occupancy, price_per_night) VALUES ($1, $2, $3, $4, $5)",
-		room.Id, room.HotelId, room.RoomType, room.MaxOccupancy, room.PricePerNight)
+func (dao roomDAO) Create(ctx context.Context, room *domain.Room) error {
+	_, err := dao.db.NewInsert().Model(room).Exec(ctx)
 
-	return err
-}
-
-func (dao roomDAO) Read(id uuid.UUID) (*domain.Room, error) {
-	row := dao.db.QueryRow("SELECT id, hotel_id, room_type, max_occupancy, price_per_night FROM rooms WHERE id = $1", id)
-
-	var room domain.Room
-	err := row.Scan(&room.Id, &room.HotelId, &room.RoomType, &room.MaxOccupancy, &room.PricePerNight)
-	if err == sql.ErrNoRows {
-		return nil, nil // no room found
-	} else if err != nil {
-		return nil, err
+	if e, ok := err.(pgdriver.Error); ok && e.IntegrityViolation() {
+		return customErrors.NewAlreadyExistsError("room already exists")
 	}
 
-	return &room, nil
+	return err
 }
 
-func (dao roomDAO) Update(room domain.Room) error {
-	_, err := dao.db.Exec("UPDATE rooms SET hotel_id = $1, room_type = $2, max_occupancy = $3, price_per_night = $4 WHERE id = $5",
-		room.HotelId, room.RoomType, room.MaxOccupancy, room.PricePerNight, room.Id)
+func (dao roomDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Room, error) {
+	room := new(domain.Room)
+
+	err := dao.db.NewSelect().
+		Model(room).
+		Where("id = ?", id).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return room, nil
+}
+
+func (dao roomDAO) Update(ctx context.Context, room *domain.Room) error {
+	_, err := dao.db.NewUpdate().Model(room).Where("id = ?", room.Id).Exec(ctx)
 
 	return err
 }
 
-func (dao roomDAO) Delete(id uuid.UUID) error {
-	_, err := dao.db.Exec("DELETE FROM rooms WHERE id = $1", id)
+func (dao roomDAO) Delete(ctx context.Context, id uuid.UUID) error {
+	room := new(domain.Room)
+	room.Id = id
+	_, err := dao.db.NewDelete().Model(room).WherePK().Exec(ctx)
 
 	return err
 }
