@@ -41,6 +41,7 @@ func (dao userDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.User, err
 	err := dao.db.NewSelect().
 		Model(user).
 		Where("id = ?", id).
+		Relation("Role").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
@@ -54,6 +55,7 @@ func (dao userDAO) GetByEmail(ctx context.Context, email string) (*domain.User, 
 	err := dao.db.NewSelect().
 		Model(user).
 		Where("email = ?", email).
+		Relation("Role").
 		Scan(ctx)
 	if err != nil {
 		return nil, err

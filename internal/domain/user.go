@@ -7,21 +7,22 @@ type User struct {
 	Name         string
 	Email        string
 	PasswordHash string `bun:"password_hash"`
-	RoleId       uuid.UUID
 	IsActive     bool
+	RoleId       uuid.UUID
+	Role         *Role `bun:"rel:belongs-to"`
 }
 
 func NewUser(
 	name string,
 	email string,
 	password string,
-	roleId string) *User {
+	roleId uuid.UUID) *User {
 	return &User{
 		Id:           uuid.New(),
 		Name:         name,
 		Email:        email,
 		PasswordHash: password,
-		RoleId:       uuid.MustParse(roleId),
+		RoleId:       roleId,
 		IsActive:     true,
 	}
 }

@@ -10,3 +10,9 @@ type Role struct {
 func NewRole(name string) Role {
 	return Role{Id: uuid.New(), Name: name}
 }
+
+const (
+	USER    = "user"
+	MANAGER = "manager"
+	ADMIN   = "admin"
+)

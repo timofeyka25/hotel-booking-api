@@ -39,9 +39,10 @@ func main() {
 
 	// init dao
 	userDao := dao.NewUserDAO(db)
+	roleDAO := dao.NewRoleDAO(db)
 
 	// init use cases
-	userUseCase := usecase.NewUserUseCase(userDao, jwtGenerator)
+	userUseCase := usecase.NewUserUseCase(userDao, roleDAO, jwtGenerator)
 
 	// init handlers
 	userHandler := handler.NewUserHandler(userUseCase, validate)

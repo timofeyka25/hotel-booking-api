@@ -29,7 +29,14 @@ func (h UserHandler) SignIn(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.SignInResponseDTO{Message: err.Error()})
 	}
 
-	ctx.Cookies("token", token)
+	user, err := h.uc.GetUser(ctx.Context(), signInDto.Email)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.SignInResponseDTO{Message: err.Error()})
+	}
+
+	ctx.Cookie(&fiber.Cookie{Name: "token", Value: token})
+	ctx.Cookie(&fiber.Cookie{Name: "id", Value: user.Id.String()})
+	ctx.Cookie(&fiber.Cookie{Name: "role", Value: user.Role.Name})
 
 	return ctx.JSON(dto.SignInResponseDTO{Token: token})
 }
