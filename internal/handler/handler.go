@@ -26,7 +26,7 @@ func NewHandler(userHandler *UserHandler,
 
 func (h *handler) InitRoutes(app *fiber.App) {
 	// auth handlers
-	app.Get("/sign-in", h.userHandler.SignIn)
+	app.Post("/sign-in", h.userHandler.SignIn)
 	app.Post("/sign-up", h.userHandler.SignUp)
 
 	// hotel handlers

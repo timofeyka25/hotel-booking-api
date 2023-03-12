@@ -17,6 +17,17 @@ func NewRoomHandler(roomUseCase usecase.RoomUseCase, validator *validator.Valida
 	return &RoomHandler{roomUseCase: roomUseCase, validator: validator}
 }
 
+// AddRoom
+//
+// @Summary Add a new room to a hotel
+// @Tags Room
+// @Accept json
+// @Param id path string true "Hotel ID"
+// @Param input body dto.AddRoomDTO true "New room data"
+// @Success 201 {object} dto.ReturnIdDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /hotel/{id}/room [post]
 func (h *RoomHandler) AddRoom(ctx *fiber.Ctx) error {
 	idDto := new(dto.GetByIdDTO)
 	roomDto := new(dto.AddRoomDTO)
@@ -39,6 +50,16 @@ func (h *RoomHandler) AddRoom(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(dto.ReturnIdDTO{Id: id})
 }
 
+// GetRoomById
+//
+// @Summary Get a room by ID
+// @Tags Room
+// @Accept json
+// @Param id path string true "Room ID"
+// @Success 200 {object} dto.RoomDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /room/{id} [get]
 func (h *RoomHandler) GetRoomById(ctx *fiber.Ctx) error {
 	idDto := new(dto.GetByIdDTO)
 	if err := ctx.ParamsParser(idDto); err != nil {
@@ -54,6 +75,16 @@ func (h *RoomHandler) GetRoomById(ctx *fiber.Ctx) error {
 	return ctx.JSON(mapDtoRoom(room))
 }
 
+// GetHotelRooms
+//
+// @Summary Get all rooms for a hotel
+// @Tags Room
+// @Accept json
+// @Param id path string true "Hotel ID"
+// @Success 200 {object} []dto.RoomDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /hotel/{id}/room/all [get]
 func (h *RoomHandler) GetHotelRooms(ctx *fiber.Ctx) error {
 	idDto := new(dto.GetByIdDTO)
 	if err := ctx.ParamsParser(idDto); err != nil {

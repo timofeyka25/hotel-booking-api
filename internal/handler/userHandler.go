@@ -57,7 +57,7 @@ func (h UserHandler) SignIn(ctx *fiber.Ctx) error {
 //	@Tags		Authentication
 //	@Accept		json
 //	@Param		input body dto.SignUpRequestDTO	true "User credentials"
-//	@Success	200 {object}	dto.SignUpResponseDTO
+//	@Success	201 {object}	dto.ReturnIdDTO
 //	@Failure	400	{object}	dto.ErrorDTO
 //	@Failure	500	{object}	dto.ErrorDTO
 //	@Router		/sign-up [post]

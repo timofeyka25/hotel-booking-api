@@ -17,6 +17,16 @@ func NewHotelHandler(hotelUseCase usecase.HotelUseCase, validator *validator.Val
 	return &HotelHandler{hotelUseCase: hotelUseCase, validator: validator}
 }
 
+// AddHotel
+//
+//	@Summary	Add a new hotel
+//	@Tags		Hotel
+//	@Accept		json
+//	@Param		input	body dto.AddHotelDTO true "Hotel data"
+//	@Success	201		{object}	dto.ReturnIdDTO
+//	@Failure	400		{object}	dto.ErrorDTO
+//	@Failure	500		{object}	dto.ErrorDTO
+//	@Router		/hotel [post]
 func (h *HotelHandler) AddHotel(ctx *fiber.Ctx) error {
 	addHotelDTO := new(dto.AddHotelDTO)
 	if err := ctx.BodyParser(addHotelDTO); err != nil {
@@ -32,6 +42,14 @@ func (h *HotelHandler) AddHotel(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(dto.ReturnIdDTO{Id: id})
 }
 
+// GetAllHotels
+//
+//	@Summary	Get all hotels
+//	@Tags		Hotel
+//	@Accept		json
+//	@Success	200		{object}	[]dto.HotelDTO
+//	@Failure	500		{object}	dto.ErrorDTO
+//	@Router		/hotel/all [get]
 func (h *HotelHandler) GetAllHotels(ctx *fiber.Ctx) error {
 	hotels, err := h.hotelUseCase.GetAllHotels(ctx.Context())
 	if err != nil {
@@ -40,6 +58,16 @@ func (h *HotelHandler) GetAllHotels(ctx *fiber.Ctx) error {
 	return ctx.JSON(mapDtoHotels(hotels))
 }
 
+// GetHotelById
+//
+//	@Summary	Get a hotel by ID
+//	@Tags		Hotel
+//	@Accept		json
+//	@Param		id		path	string	true	"Hotel ID"
+//	@Success	200		{object}	dto.HotelDTO
+//	@Failure	400		{object}	dto.ErrorDTO
+//	@Failure	500		{object}	dto.ErrorDTO
+//	@Router		/hotel/{id} [get]
 func (h *HotelHandler) GetHotelById(ctx *fiber.Ctx) error {
 	idDto := new(dto.GetByIdDTO)
 	if err := ctx.ParamsParser(idDto); err != nil {
@@ -55,6 +83,17 @@ func (h *HotelHandler) GetHotelById(ctx *fiber.Ctx) error {
 	return ctx.JSON(mapDtoHotel(hotel))
 }
 
+// UpdateHotel
+//
+// @Summary Update hotel by id
+// @Tags Hotel
+// @Accept json
+// @Param id path string true "Hotel ID"
+// @Param input body dto.UpdateHotelDTO true "Hotel data"
+// @Success 200 {object} dto.SuccessDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /hotel/{id} [put]
 func (h *HotelHandler) UpdateHotel(ctx *fiber.Ctx) error {
 	idDto := new(dto.GetByIdDTO)
 	updateDto := new(dto.UpdateHotelDTO)
@@ -76,6 +115,15 @@ func (h *HotelHandler) UpdateHotel(ctx *fiber.Ctx) error {
 	return ctx.JSON(dto.SuccessDTO{Message: "Updated"})
 }
 
+// DeleteHotel
+//
+// @Summary Delete a hotel by ID
+// @Tags Hotel
+// @Param id path string true "Hotel ID"
+// @Success 200 {object} dto.SuccessDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /hotel/{id} [delete]
 func (h *HotelHandler) DeleteHotel(ctx *fiber.Ctx) error {
 	idDto := new(dto.GetByIdDTO)
 	if err := ctx.ParamsParser(idDto); err != nil {

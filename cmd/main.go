@@ -19,6 +19,7 @@ import (
 )
 
 //	@title		Backend API
+//  @version 1.0
 //	@host		localhost:8000
 //	@BasePath	/
 

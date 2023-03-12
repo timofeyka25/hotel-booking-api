@@ -1,8 +1,58 @@
 basePath: /
 definitions:
+  hotel-booking-app_internal_handler_dto.AddHotelDTO:
+    properties:
+      description:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+    required:
+    - location
+    - name
+    type: object
+  hotel-booking-app_internal_handler_dto.AddRoomDTO:
+    properties:
+      max_occupancy:
+        type: integer
+      price_per_night:
+        type: number
+      room_type:
+        type: string
+    type: object
   hotel-booking-app_internal_handler_dto.ErrorDTO:
     properties:
       message:
+        type: string
+    type: object
+  hotel-booking-app_internal_handler_dto.HotelDTO:
+    properties:
+      description:
+        type: string
+      id:
+        type: string
+      location:
+        type: string
+      name:
+        type: string
+    type: object
+  hotel-booking-app_internal_handler_dto.ReturnIdDTO:
+    properties:
+      id:
+        type: string
+    type: object
+  hotel-booking-app_internal_handler_dto.RoomDTO:
+    properties:
+      hotel:
+        $ref: '#/definitions/hotel-booking-app_internal_handler_dto.HotelDTO'
+      id:
+        type: string
+      max_occupancy:
+        type: integer
+      price_per_night:
+        type: number
+      room_type:
         type: string
     type: object
   hotel-booking-app_internal_handler_dto.SignInRequestDTO:
@@ -37,16 +87,237 @@ definitions:
     - name
     - password
     type: object
-  hotel-booking-app_internal_handler_dto.SignUpResponseDTO:
+  hotel-booking-app_internal_handler_dto.SuccessDTO:
     properties:
-      id:
+      message:
+        type: string
+    type: object
+  hotel-booking-app_internal_handler_dto.UpdateHotelDTO:
+    properties:
+      description:
+        type: string
+      location:
+        type: string
+      name:
         type: string
     type: object
 host: localhost:8000
 info:
   contact: {}
   title: Backend API
+  version: "1.0"
 paths:
+  /hotel:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Hotel data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/hotel-booking-app_internal_handler_dto.AddHotelDTO'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ReturnIdDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Add a new hotel
+      tags:
+      - Hotel
+  /hotel/{id}:
+    delete:
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SuccessDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Delete a hotel by ID
+      tags:
+      - Hotel
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.HotelDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Get a hotel by ID
+      tags:
+      - Hotel
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Hotel data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/hotel-booking-app_internal_handler_dto.UpdateHotelDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SuccessDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Update hotel by id
+      tags:
+      - Hotel
+  /hotel/{id}/room:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: New room data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/hotel-booking-app_internal_handler_dto.AddRoomDTO'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ReturnIdDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Add a new room to a hotel
+      tags:
+      - Room
+  /hotel/{id}/room/all:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Hotel ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/hotel-booking-app_internal_handler_dto.RoomDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Get all rooms for a hotel
+      tags:
+      - Room
+  /hotel/all:
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/hotel-booking-app_internal_handler_dto.HotelDTO'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Get all hotels
+      tags:
+      - Hotel
+  /room/{id}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.RoomDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Get a room by ID
+      tags:
+      - Room
   /sign-in:
     post:
       consumes:
@@ -86,10 +357,10 @@ paths:
         schema:
           $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SignUpRequestDTO'
       responses:
-        "200":
-          description: OK
+        "201":
+          description: Created
           schema:
-            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SignUpResponseDTO'
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ReturnIdDTO'
         "400":
           description: Bad Request
           schema:
