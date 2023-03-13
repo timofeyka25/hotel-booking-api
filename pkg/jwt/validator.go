@@ -15,17 +15,23 @@ func NewTokenValidator(cfg Config) *TokenValidator {
 	}
 }
 
-func (v *TokenValidator) ValidateToken(token string) error {
-	parsed, err := jwt.Parse(token, func(jwtToken *jwt.Token) (interface{}, error) {
+type TokenParsedParams struct {
+	Id   string
+	Role string
+}
+
+func (v *TokenValidator) ValidateToken(token string) (*TokenParsedParams, error) {
+	claims := &Claims{}
+	parsed, err := jwt.ParseWithClaims(token, claims, func(jwtToken *jwt.Token) (interface{}, error) {
 		return []byte(v.secretKey), nil
 	})
 	if err != nil {
-		return customErrors.NewUnauthorizedError()
+		return nil, customErrors.NewUnauthorizedError()
 	}
 
 	if !parsed.Valid {
-		return customErrors.NewUnauthorizedError()
+		return nil, customErrors.NewUnauthorizedError()
 	}
 
-	return nil
+	return &TokenParsedParams{Id: claims.Id, Role: claims.Role}, nil
 }

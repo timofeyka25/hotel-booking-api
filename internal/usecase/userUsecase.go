@@ -60,7 +60,11 @@ func (uc userUseCase) SignIn(ctx context.Context, params SignInParams) (string, 
 		return "", errors.New("incorrect password")
 	}
 
-	return uc.tokenGenerator.GenerateNewAccessToken(24 * time.Hour)
+	return uc.tokenGenerator.GenerateNewAccessToken(jwt.Params{
+		Id:   user.Id.String(),
+		Role: user.Role.Name,
+		Ttl:  24 * time.Hour,
+	})
 }
 
 func (uc userUseCase) GetUser(ctx context.Context, email string) (*domain.User, error) {

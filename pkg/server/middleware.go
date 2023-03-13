@@ -15,13 +15,16 @@ func NewTokenValidatorMiddleware(tokenValidator *jwt.TokenValidator) *tokenValid
 }
 
 func (m *tokenValidatorMiddleware) validateToken(ctx *fiber.Ctx) error {
-	if err := m.tokenValidator.ValidateToken(ctx.Cookies("token")); err != nil {
+	parsedParams, err := m.tokenValidator.ValidateToken(ctx.Cookies("token"))
+	if err != nil {
 		if _, ok := err.(*customErrors.UnauthorizedError); ok {
 			return fiber.NewError(fiber.StatusUnauthorized, err.Error())
 		}
 
 		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
+	ctx.Cookie(&fiber.Cookie{Name: "id", Value: parsedParams.Id})
+	ctx.Cookie(&fiber.Cookie{Name: "role", Value: parsedParams.Role})
 
 	return ctx.Next()
 }
