@@ -39,6 +39,7 @@ func (h *handler) InitRoutes(app *fiber.App) {
 	// room handlers
 	app.Post("/hotel/:id/room", h.isManager, h.roomHandler.AddRoom)
 	app.Get("/hotel/:id/room/all", h.roomHandler.GetHotelRooms)
+	app.Get("/hotel/:id/room/free", h.roomHandler.GetHotelFreeRooms)
 	app.Get("/room/:id", h.roomHandler.GetRoomById)
 
 	// swagger handler

@@ -7,12 +7,14 @@ import (
 	"github.com/uptrace/bun/driver/pgdriver"
 	"hotel-booking-app/internal/domain"
 	"hotel-booking-app/pkg/customErrors"
+	"time"
 )
 
 type RoomDAO interface {
 	Create(context.Context, *domain.Room) error
 	GetById(context.Context, uuid.UUID) (*domain.Room, error)
 	GetByHotelId(context.Context, uuid.UUID) ([]*domain.Room, error)
+	GetByHotelIdFreeRooms(context.Context, uuid.UUID) ([]*domain.Room, error)
 	Update(context.Context, *domain.Room) error
 	Delete(context.Context, uuid.UUID) error
 }
@@ -52,6 +54,22 @@ func (dao roomDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Room, err
 func (dao roomDAO) GetByHotelId(ctx context.Context, hotelId uuid.UUID) ([]*domain.Room, error) {
 	var rooms []*domain.Room
 	err := dao.db.NewSelect().Model(&rooms).Where("hotel_id = ?", hotelId).Relation("Hotel").Scan(ctx)
+
+	return rooms, err
+}
+
+func (dao roomDAO) GetByHotelIdFreeRooms(ctx context.Context, hotelId uuid.UUID) ([]*domain.Room, error) {
+	var rooms []*domain.Room
+	err := dao.db.NewSelect().
+		Model(&rooms).
+		Where("hotel_id = ?", hotelId).
+		Relation("Hotel").
+		Join("LEFT JOIN reservations ON room.id = reservations.room_id").
+		Where("reservations.check_out_date IS NULL").
+		WhereOr("reservations.check_out_date < ?", time.Now()).
+		WhereOr("reservations.status IS NULL").
+		WhereOr("reservations.status = ?", domain.CANCELLED).
+		Scan(ctx)
 
 	return rooms, err
 }

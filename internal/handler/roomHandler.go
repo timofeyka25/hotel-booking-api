@@ -99,3 +99,28 @@ func (h *RoomHandler) GetHotelRooms(ctx *fiber.Ctx) error {
 	}
 	return ctx.JSON(mapDtoRooms(rooms))
 }
+
+// GetHotelFreeRooms
+//
+// @Summary Get all free rooms for a hotel
+// @Tags Room
+// @Accept json
+// @Param id path string true "Hotel ID"
+// @Success 200 {object} []dto.RoomDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /hotel/{id}/room/free [get]
+func (h *RoomHandler) GetHotelFreeRooms(ctx *fiber.Ctx) error {
+	idDto := new(dto.GetByIdDTO)
+	if err := ctx.ParamsParser(idDto); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	if err := h.validator.Struct(idDto); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	rooms, err := h.roomUseCase.GetHotelFreeRooms(ctx.Context(), uuid.MustParse(idDto.Id))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	return ctx.JSON(mapDtoRooms(rooms))
+}
