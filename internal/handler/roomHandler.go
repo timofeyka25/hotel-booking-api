@@ -99,3 +99,18 @@ func (h *RoomHandler) GetHotelRooms(ctx *fiber.Ctx) error {
 	}
 	return ctx.JSON(mapDtoRooms(rooms))
 }
+
+func (h *RoomHandler) GetHotelFreeRooms(ctx *fiber.Ctx) error {
+	idDto := new(dto.GetByIdDTO)
+	if err := ctx.ParamsParser(idDto); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	if err := h.validator.Struct(idDto); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	rooms, err := h.roomUseCase.GetHotelFreeRooms(ctx.Context(), uuid.MustParse(idDto.Id))
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	return ctx.JSON(mapDtoRooms(rooms))
+}
