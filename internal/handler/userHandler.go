@@ -26,6 +26,7 @@ func NewUserHandler(userUseCase usecase.UserUseCase, validator *validator.Valida
 //	@Param		input	body dto.SignInRequestDTO true "User credentials"
 //	@Success	200		{object}	dto.SignInResponseDTO
 //	@Failure	400		{object}	dto.ErrorDTO
+//	@Failure	403		{object}	dto.ErrorDTO
 //	@Failure	500		{object}	dto.ErrorDTO
 //	@Router		/sign-in [post]
 func (h *UserHandler) SignIn(ctx *fiber.Ctx) error {
@@ -38,6 +39,10 @@ func (h *UserHandler) SignIn(ctx *fiber.Ctx) error {
 	}
 	token, err := h.userUseCase.SignIn(ctx.Context(), toSignInParams(signInDto))
 	if err != nil {
+		_, ok := err.(*customErrors.NotActiveError)
+		if ok {
+			return ctx.Status(fiber.StatusForbidden).JSON(dto.ErrorDTO{Message: err.Error()})
+		}
 		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
 	}
 

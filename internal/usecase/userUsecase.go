@@ -63,6 +63,10 @@ func (uc userUseCase) SignIn(ctx context.Context, params SignInParams) (string, 
 		return "", errors.New("incorrect password")
 	}
 
+	if user.IsActive == false {
+		return "", customErrors.NewNotActiveError("This account is no longer active")
+	}
+
 	return uc.tokenGenerator.GenerateNewAccessToken(jwt.Params{
 		Id:   user.Id.String(),
 		Role: user.Role.Name,
