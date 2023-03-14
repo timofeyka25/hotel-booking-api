@@ -9,18 +9,21 @@ import (
 )
 
 type handler struct {
-	userHandler  *UserHandler
-	hotelHandler *HotelHandler
-	roomHandler  *RoomHandler
+	userHandler        *UserHandler
+	hotelHandler       *HotelHandler
+	roomHandler        *RoomHandler
+	reservationHandler *ReservationHandler
 }
 
 func NewHandler(userHandler *UserHandler,
 	hotelHandler *HotelHandler,
-	roomHandler *RoomHandler) *handler {
+	roomHandler *RoomHandler,
+	reservationHandler *ReservationHandler) *handler {
 	return &handler{
-		userHandler:  userHandler,
-		hotelHandler: hotelHandler,
-		roomHandler:  roomHandler,
+		userHandler:        userHandler,
+		hotelHandler:       hotelHandler,
+		roomHandler:        roomHandler,
+		reservationHandler: reservationHandler,
 	}
 }
 
@@ -43,6 +46,13 @@ func (h *handler) InitRoutes(app *fiber.App) {
 	app.Get("/room/:id", h.roomHandler.GetRoomById)
 	app.Put("/room/:id", h.isManager, h.roomHandler.UpdateRoom)
 	app.Delete("/room/:id", h.isManager, h.roomHandler.DeleteRoom)
+
+	// reservation handlers
+	app.Post("/room/:id/reserve", h.reservationHandler.CreateReservation)
+	app.Get("/reservation/all", h.reservationHandler.GetAllUserReservations)
+	app.Get("/reservation/all/manager", h.isManager, h.reservationHandler.GetAllReservations)
+	app.Get("/reservation/:id/cancel", h.reservationHandler.CancelUserReservation)
+	app.Put("/reservation/:id/status", h.isManager, h.reservationHandler.UpdateReservationStatus)
 
 	// swagger handler
 	app.Get("/swagger/*", swagger.HandlerDefault)

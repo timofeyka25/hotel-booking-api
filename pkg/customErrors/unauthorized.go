@@ -8,5 +8,5 @@ func NewUnauthorizedError() *UnauthorizedError {
 }
 
 func (e *UnauthorizedError) Error() string {
-	return "unauthorized"
+	return "Unauthorized"
 }

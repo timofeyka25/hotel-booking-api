@@ -57,6 +57,28 @@ func toUpdateRoomParams(id uuid.UUID, dto *dto.UpdateRoomDTO) usecase.UpdateRoom
 	}
 }
 
+func toCreateReservationParams(
+	roomId, userId uuid.UUID,
+	dto *dto.CreateReservationParsedDTO,
+) usecase.CreateReservationParams {
+	return usecase.CreateReservationParams{
+		UserId:       userId,
+		RoomId:       roomId,
+		CheckInDate:  dto.CheckInDate,
+		CheckOutDate: dto.CheckOutDate,
+	}
+}
+
+func toUpdateReservationStatusParams(
+	id uuid.UUID,
+	dto *dto.UpdateReservationStatusDTO,
+) usecase.UpdateReservationStatusParams {
+	return usecase.UpdateReservationStatusParams{
+		Id:     id,
+		Status: dto.Status,
+	}
+}
+
 func mapDtoHotel(hotel *domain.Hotel) *dto.HotelDTO {
 	return &dto.HotelDTO{
 		Id:          hotel.Id,
@@ -90,4 +112,24 @@ func mapDtoRooms(rooms []*domain.Room) []*dto.RoomDTO {
 		dtoRooms = append(dtoRooms, mapDtoRoom(room))
 	}
 	return dtoRooms
+}
+
+func mapDtoReservation(reservation *domain.Reservation) *dto.ReservationDTO {
+	return &dto.ReservationDTO{
+		Id:            reservation.Id,
+		UserId:        reservation.UserId,
+		Room:          mapDtoRoom(reservation.Room),
+		CheckInDate:   reservation.CheckInDate,
+		CheckOutDate:  reservation.CheckOutDate,
+		Status:        reservation.Status,
+		PaymentStatus: reservation.PaymentStatus,
+	}
+}
+
+func mapDtoReservations(reservations []*domain.Reservation) []*dto.ReservationDTO {
+	var dtoReservations []*dto.ReservationDTO
+	for _, reservation := range reservations {
+		dtoReservations = append(dtoReservations, mapDtoReservation(reservation))
+	}
+	return dtoReservations
 }

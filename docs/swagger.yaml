@@ -21,6 +21,16 @@ definitions:
       room_type:
         type: string
     type: object
+  hotel-booking-app_internal_handler_dto.CreateReservationDTO:
+    properties:
+      check_in_date:
+        type: string
+      check_out_date:
+        type: string
+    required:
+    - check_in_date
+    - check_out_date
+    type: object
   hotel-booking-app_internal_handler_dto.ErrorDTO:
     properties:
       message:
@@ -35,6 +45,23 @@ definitions:
       location:
         type: string
       name:
+        type: string
+    type: object
+  hotel-booking-app_internal_handler_dto.ReservationDTO:
+    properties:
+      check_in_date:
+        type: string
+      check_out_date:
+        type: string
+      id:
+        type: string
+      payment_status:
+        type: string
+      room:
+        $ref: '#/definitions/hotel-booking-app_internal_handler_dto.RoomDTO'
+      status:
+        type: string
+      user_id:
         type: string
     type: object
   hotel-booking-app_internal_handler_dto.ReturnIdDTO:
@@ -99,6 +126,11 @@ definitions:
       location:
         type: string
       name:
+        type: string
+    type: object
+  hotel-booking-app_internal_handler_dto.UpdateReservationStatusDTO:
+    properties:
+      status:
         type: string
     type: object
   hotel-booking-app_internal_handler_dto.UpdateRoomDTO:
@@ -329,6 +361,120 @@ paths:
       summary: Get all hotels
       tags:
       - Hotel
+  /reservation/:id/cancel:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SuccessDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Cancel a user's reservation
+      tags:
+      - Reservation
+  /reservation/:id/status:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Reservation ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Reservation status data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/hotel-booking-app_internal_handler_dto.UpdateReservationStatusDTO'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.SuccessDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Update the status of a reservation
+      tags:
+      - Reservation
+  /reservation/all:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ReservationDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Get all reservations for the authenticated user
+      tags:
+      - Reservation
+  /reservation/all/manager:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ReservationDTO'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Get all reservations (this request for the manager)
+      tags:
+      - Reservation
   /room/{id}:
     delete:
       consumes:
@@ -411,6 +557,42 @@ paths:
       summary: Update a room in a hotel
       tags:
       - Room
+  /room/{id}/reserve:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Room ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Reservation data
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/hotel-booking-app_internal_handler_dto.CreateReservationDTO'
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ReturnIdDTO'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO'
+      summary: Create a reservation for a room in a hotel
+      tags:
+      - Reservation
   /sign-in:
     post:
       consumes:

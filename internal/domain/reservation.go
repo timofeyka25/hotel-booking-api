@@ -19,6 +19,7 @@ type Reservation struct {
 	Id            uuid.UUID `bun:",pk"`
 	UserId        uuid.UUID
 	RoomId        uuid.UUID
+	Room          *Room `bun:"rel:belongs-to"`
 	CheckInDate   time.Time
 	CheckOutDate  time.Time
 	Status        string
@@ -26,13 +27,13 @@ type Reservation struct {
 }
 
 func NewReservation(
-	userId, roomId string,
+	userId, roomId uuid.UUID,
 	CheckInDate, CheckOutDate time.Time,
 	status, paymentStatus string) *Reservation {
 	return &Reservation{
 		Id:            uuid.New(),
-		UserId:        uuid.MustParse(userId),
-		RoomId:        uuid.MustParse(roomId),
+		UserId:        userId,
+		RoomId:        roomId,
 		CheckInDate:   CheckInDate,
 		CheckOutDate:  CheckOutDate,
 		Status:        status,

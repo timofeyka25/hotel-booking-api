@@ -47,17 +47,25 @@ func main() {
 	roleDAO := dao.NewRoleDAO(db)
 	hotelDAO := dao.NewHotelDAO(db)
 	roomDAO := dao.NewRoomDAO(db)
+	reservationDAO := dao.NewReservationDAO(db)
 
 	// init use cases
 	userUseCase := usecase.NewUserUseCase(userDao, roleDAO, jwtGenerator)
 	hotelUseCase := usecase.NewHotelUseCase(hotelDAO)
 	roomUseCase := usecase.NewRoomUseCase(roomDAO)
+	reservationUseCase := usecase.NewReservationUseCase(reservationDAO)
 
 	// init handlers
 	userHandler := handler.NewUserHandler(userUseCase, validate)
 	hotelHandler := handler.NewHotelHandler(hotelUseCase, validate)
 	roomHandler := handler.NewRoomHandler(roomUseCase, validate)
-	handlers := handler.NewHandler(userHandler, hotelHandler, roomHandler)
+	reservationHandler := handler.NewReservationHandler(reservationUseCase, validate)
+	handlers := handler.NewHandler(
+		userHandler,
+		hotelHandler,
+		roomHandler,
+		reservationHandler,
+	)
 
 	// init app
 	app := server.NewHTTPServer(jwtValidator)

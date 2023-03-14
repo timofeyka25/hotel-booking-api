@@ -12,8 +12,11 @@ import (
 type ReservationDAO interface {
 	Create(context.Context, *domain.Reservation) error
 	GetById(context.Context, uuid.UUID) (*domain.Reservation, error)
+	GetByRoomAndUserId(context.Context, uuid.UUID, uuid.UUID) ([]*domain.Reservation, error)
 	Update(context.Context, *domain.Reservation) error
 	Delete(context.Context, uuid.UUID) error
+	GetByUserId(context.Context, uuid.UUID) ([]*domain.Reservation, error)
+	GetAll(ctx context.Context) ([]*domain.Reservation, error)
 }
 
 type reservationDAO struct {
@@ -41,6 +44,50 @@ func (dao reservationDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Re
 		Model(r).
 		Where("id = ?", id).
 		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+func (dao reservationDAO) GetByRoomAndUserId(
+	ctx context.Context,
+	userId, roomId uuid.UUID,
+) ([]*domain.Reservation, error) {
+	var r []*domain.Reservation
+
+	err := dao.db.NewSelect().
+		Model(&r).
+		Where("user_id = ?", userId).
+		Where("room_id = ?", roomId).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (dao reservationDAO) GetByUserId(ctx context.Context, id uuid.UUID) ([]*domain.Reservation, error) {
+	var r []*domain.Reservation
+
+	err := dao.db.NewSelect().
+		Model(&r).
+		Where("reservation.user_id = ?", id).
+		Relation("Room").
+		Relation("Room.Hotel").
+		OrderExpr("reservation.check_in_date ASC").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r, nil
+}
+
+func (dao reservationDAO) GetAll(ctx context.Context) ([]*domain.Reservation, error) {
+	var r []*domain.Reservation
+	err := dao.db.NewSelect().
+		Model(&r).
+		Relation("Room").
+		Relation("Room.Hotel").
+		OrderExpr("reservation.check_in_date ASC").Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
