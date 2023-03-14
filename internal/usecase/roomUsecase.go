@@ -12,6 +12,8 @@ type RoomUseCase interface {
 	GetRoomById(context.Context, uuid.UUID) (*domain.Room, error)
 	GetHotelRooms(context.Context, uuid.UUID) ([]*domain.Room, error)
 	GetHotelFreeRooms(context.Context, uuid.UUID) ([]*domain.Room, error)
+	UpdateRoom(context.Context, UpdateRoomParams) error
+	DeleteRoom(context.Context, uuid.UUID) error
 }
 
 type roomUseCase struct {
@@ -47,9 +49,37 @@ func (uc roomUseCase) GetHotelFreeRooms(ctx context.Context, hotelId uuid.UUID) 
 	return uc.roomDAO.GetByHotelIdFreeRooms(ctx, hotelId)
 }
 
+func (uc roomUseCase) UpdateRoom(ctx context.Context, params UpdateRoomParams) error {
+	room, err := uc.roomDAO.GetById(ctx, params.Id)
+	if err != nil {
+		return err
+	}
+	if params.RoomType != nil {
+		room.RoomType = *params.RoomType
+	}
+	if params.MaxOccupancy != nil {
+		room.MaxOccupancy = *params.MaxOccupancy
+	}
+	if params.PricePerNight != nil {
+		room.PricePerNight = *params.PricePerNight
+	}
+	return uc.roomDAO.Update(ctx, room)
+}
+
+func (uc roomUseCase) DeleteRoom(ctx context.Context, id uuid.UUID) error {
+	return uc.roomDAO.Delete(ctx, id)
+}
+
 type AddRoomParams struct {
 	HotelId       uuid.UUID
 	RoomType      string
 	MaxOccupancy  int
 	PricePerNight float64
+}
+
+type UpdateRoomParams struct {
+	Id            uuid.UUID
+	RoomType      *string
+	MaxOccupancy  *int
+	PricePerNight *float64
 }

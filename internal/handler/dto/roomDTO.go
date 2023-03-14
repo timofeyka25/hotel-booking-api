@@ -15,3 +15,9 @@ type RoomDTO struct {
 	MaxOccupancy  int       `json:"max_occupancy"`
 	PricePerNight float64   `json:"price_per_night"`
 }
+
+type UpdateRoomDTO struct {
+	RoomType      *string  `json:"room_type"`
+	MaxOccupancy  *int     `json:"max_occupancy"`
+	PricePerNight *float64 `json:"price_per_night"`
+}

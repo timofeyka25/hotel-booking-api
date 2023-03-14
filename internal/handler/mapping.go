@@ -48,6 +48,15 @@ func toUpdateHotelParams(id uuid.UUID, dto *dto.UpdateHotelDTO) usecase.UpdateHo
 	}
 }
 
+func toUpdateRoomParams(id uuid.UUID, dto *dto.UpdateRoomDTO) usecase.UpdateRoomParams {
+	return usecase.UpdateRoomParams{
+		Id:            id,
+		RoomType:      dto.RoomType,
+		MaxOccupancy:  dto.MaxOccupancy,
+		PricePerNight: dto.PricePerNight,
+	}
+}
+
 func mapDtoHotel(hotel *domain.Hotel) *dto.HotelDTO {
 	return &dto.HotelDTO{
 		Id:          hotel.Id,

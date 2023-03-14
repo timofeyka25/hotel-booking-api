@@ -124,3 +124,59 @@ func (h *RoomHandler) GetHotelFreeRooms(ctx *fiber.Ctx) error {
 	}
 	return ctx.JSON(mapDtoRooms(rooms))
 }
+
+// UpdateRoom
+//
+// @Summary Update a room in a hotel
+// @Tags Room
+// @Accept json
+// @Param id path string true "Room ID"
+// @Param input body dto.UpdateRoomDTO true "Room data"
+// @Success 200 {object} dto.SuccessDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /room/{id} [put]
+func (h *RoomHandler) UpdateRoom(ctx *fiber.Ctx) error {
+	idDto := new(dto.GetByIdDTO)
+	updateDto := new(dto.UpdateRoomDTO)
+	if err := ctx.ParamsParser(idDto); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	if err := ctx.BodyParser(updateDto); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	if err := h.validator.Struct(idDto); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	if err := h.validator.Struct(updateDto); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	if err := h.roomUseCase.UpdateRoom(ctx.Context(), toUpdateRoomParams(uuid.MustParse(idDto.Id), updateDto)); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	return ctx.JSON(dto.SuccessDTO{Message: "Updated"})
+}
+
+// DeleteRoom
+//
+// @Summary Delete a room from a hotel
+// @Tags Room
+// @Accept json
+// @Param id path string true "Room ID"
+// @Success 200 {object} dto.SuccessDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /room/{id} [delete]
+func (h *RoomHandler) DeleteRoom(ctx *fiber.Ctx) error {
+	idDto := new(dto.GetByIdDTO)
+	if err := ctx.ParamsParser(idDto); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	if err := h.validator.Struct(idDto); err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	if err := h.roomUseCase.DeleteRoom(ctx.Context(), uuid.MustParse(idDto.Id)); err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	return ctx.JSON(dto.SuccessDTO{Message: "Deleted"})
+}

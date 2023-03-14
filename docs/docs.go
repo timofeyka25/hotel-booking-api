@@ -299,6 +299,49 @@ const docTemplate = `{
                 }
             }
         },
+        "/hotel/{id}/room/free": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Get all free rooms for a hotel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Hotel ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.RoomDTO"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO"
+                        }
+                    }
+                }
+            }
+        },
         "/room/{id}": {
             "get": {
                 "consumes": [
@@ -322,6 +365,91 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.RoomDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Update a room in a hotel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Room data",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.UpdateRoomDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.SuccessDTO"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.ErrorDTO"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Room"
+                ],
+                "summary": "Delete a room from a hotel",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Room ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/hotel-booking-app_internal_handler_dto.SuccessDTO"
                         }
                     },
                     "400": {
@@ -574,6 +702,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "hotel-booking-app_internal_handler_dto.UpdateRoomDTO": {
+            "type": "object",
+            "properties": {
+                "max_occupancy": {
+                    "type": "integer"
+                },
+                "price_per_night": {
+                    "type": "number"
+                },
+                "room_type": {
                     "type": "string"
                 }
             }
