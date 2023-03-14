@@ -3,10 +3,10 @@ package dao
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"hotel-booking-app/internal/domain"
 	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/db"
 )
 
 type RoleDAO interface {
@@ -18,15 +18,15 @@ type RoleDAO interface {
 }
 
 type roleDAO struct {
-	db *bun.DB
+	db *db.TransactionRepository
 }
 
-func NewRoleDAO(db *bun.DB) *roleDAO {
+func NewRoleDAO(db *db.TransactionRepository) *roleDAO {
 	return &roleDAO{db: db}
 }
 
 func (dao roleDAO) Create(ctx context.Context, role *domain.Role) error {
-	_, err := dao.db.NewInsert().Model(role).Exec(ctx)
+	_, err := dao.db.NewInsert(ctx).Model(role).Exec(ctx)
 
 	if e, ok := err.(pgdriver.Error); ok && e.IntegrityViolation() {
 		return customErrors.NewAlreadyExistsError("role already exists")
@@ -38,7 +38,7 @@ func (dao roleDAO) Create(ctx context.Context, role *domain.Role) error {
 func (dao roleDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Role, error) {
 	role := new(domain.Role)
 
-	err := dao.db.NewSelect().
+	err := dao.db.NewSelect(ctx).
 		Model(role).
 		Where("id = ?", id).
 		Scan(ctx)
@@ -51,7 +51,7 @@ func (dao roleDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Role, err
 func (dao roleDAO) GetByName(ctx context.Context, name string) (*domain.Role, error) {
 	role := new(domain.Role)
 
-	err := dao.db.NewSelect().
+	err := dao.db.NewSelect(ctx).
 		Model(role).
 		Where("name = ?", name).
 		Scan(ctx)
@@ -62,7 +62,7 @@ func (dao roleDAO) GetByName(ctx context.Context, name string) (*domain.Role, er
 }
 
 func (dao roleDAO) Update(ctx context.Context, role *domain.Role) error {
-	_, err := dao.db.NewUpdate().Model(role).Where("id = ?", role.Id).Exec(ctx)
+	_, err := dao.db.NewUpdate(ctx).Model(role).Where("id = ?", role.Id).Exec(ctx)
 
 	return err
 }
@@ -70,7 +70,7 @@ func (dao roleDAO) Update(ctx context.Context, role *domain.Role) error {
 func (dao roleDAO) Delete(ctx context.Context, id uuid.UUID) error {
 	role := new(domain.Role)
 	role.Id = id
-	_, err := dao.db.NewDelete().Model(role).WherePK().Exec(ctx)
+	_, err := dao.db.NewDelete(ctx).Model(role).WherePK().Exec(ctx)
 
 	return err
 }

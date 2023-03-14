@@ -3,10 +3,10 @@ package dao
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"hotel-booking-app/internal/domain"
 	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/db"
 )
 
 type HotelDAO interface {
@@ -18,15 +18,15 @@ type HotelDAO interface {
 }
 
 type hotelDAO struct {
-	db *bun.DB
+	db *db.TransactionRepository
 }
 
-func NewHotelDAO(db *bun.DB) *hotelDAO {
+func NewHotelDAO(db *db.TransactionRepository) *hotelDAO {
 	return &hotelDAO{db: db}
 }
 
 func (dao hotelDAO) Create(ctx context.Context, hotel *domain.Hotel) error {
-	_, err := dao.db.NewInsert().Model(hotel).Exec(ctx)
+	_, err := dao.db.NewInsert(ctx).Model(hotel).Exec(ctx)
 
 	if e, ok := err.(pgdriver.Error); ok && e.IntegrityViolation() {
 		return customErrors.NewAlreadyExistsError("hotel already exists")
@@ -38,7 +38,7 @@ func (dao hotelDAO) Create(ctx context.Context, hotel *domain.Hotel) error {
 func (dao hotelDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Hotel, error) {
 	hotel := new(domain.Hotel)
 
-	err := dao.db.NewSelect().
+	err := dao.db.NewSelect(ctx).
 		Model(hotel).
 		Where("id = ?", id).
 		Scan(ctx)
@@ -50,13 +50,13 @@ func (dao hotelDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Hotel, e
 
 func (dao hotelDAO) GetAll(ctx context.Context) ([]*domain.Hotel, error) {
 	var hotels []*domain.Hotel
-	err := dao.db.NewSelect().Model(&hotels).Scan(ctx)
+	err := dao.db.NewSelect(ctx).Model(&hotels).Scan(ctx)
 
 	return hotels, err
 }
 
 func (dao hotelDAO) Update(ctx context.Context, hotel *domain.Hotel) error {
-	_, err := dao.db.NewUpdate().Model(hotel).Where("id = ?", hotel.Id).Exec(ctx)
+	_, err := dao.db.NewUpdate(ctx).Model(hotel).Where("id = ?", hotel.Id).Exec(ctx)
 
 	return err
 }
@@ -64,7 +64,7 @@ func (dao hotelDAO) Update(ctx context.Context, hotel *domain.Hotel) error {
 func (dao hotelDAO) Delete(ctx context.Context, id uuid.UUID) error {
 	hotel := new(domain.Hotel)
 	hotel.Id = id
-	_, err := dao.db.NewDelete().Model(hotel).WherePK().Exec(ctx)
+	_, err := dao.db.NewDelete(ctx).Model(hotel).WherePK().Exec(ctx)
 
 	return err
 }

@@ -42,20 +42,25 @@ func main() {
 	jwtValidator := jwt.NewTokenValidator(jwt.Config{SecretKey: os.Getenv("JWT_SECRET_KEY")})
 	validate := validator.NewValidator()
 
+	// init transaction repository
+	transactionDb := database.NewTransactionRepository(db)
+	// init transaction manager
+	transactionManager := database.NewTransactionManager(db)
+
 	// init dao
-	userDao := dao.NewUserDAO(db)
-	roleDAO := dao.NewRoleDAO(db)
-	hotelDAO := dao.NewHotelDAO(db)
-	roomDAO := dao.NewRoomDAO(db)
-	reservationDAO := dao.NewReservationDAO(db)
-	paymentDAO := dao.NewPaymentDAO(db)
+	userDao := dao.NewUserDAO(transactionDb)
+	roleDAO := dao.NewRoleDAO(transactionDb)
+	hotelDAO := dao.NewHotelDAO(transactionDb)
+	roomDAO := dao.NewRoomDAO(transactionDb)
+	reservationDAO := dao.NewReservationDAO(transactionDb)
+	paymentDAO := dao.NewPaymentDAO(transactionDb)
 
 	// init use cases
 	userUseCase := usecase.NewUserUseCase(userDao, roleDAO, jwtGenerator)
 	hotelUseCase := usecase.NewHotelUseCase(hotelDAO)
 	roomUseCase := usecase.NewRoomUseCase(roomDAO)
 	reservationUseCase := usecase.NewReservationUseCase(reservationDAO)
-	paymentUseCase := usecase.NewPaymentUseCase(paymentDAO, reservationDAO)
+	paymentUseCase := usecase.NewPaymentUseCase(paymentDAO, reservationDAO, transactionManager)
 
 	// init handlers
 	userHandler := handler.NewUserHandler(userUseCase, validate)

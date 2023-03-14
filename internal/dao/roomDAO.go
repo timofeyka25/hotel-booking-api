@@ -3,10 +3,10 @@ package dao
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"hotel-booking-app/internal/domain"
 	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/db"
 	"time"
 )
 
@@ -20,15 +20,15 @@ type RoomDAO interface {
 }
 
 type roomDAO struct {
-	db *bun.DB
+	db *db.TransactionRepository
 }
 
-func NewRoomDAO(db *bun.DB) *roomDAO {
+func NewRoomDAO(db *db.TransactionRepository) *roomDAO {
 	return &roomDAO{db: db}
 }
 
 func (dao roomDAO) Create(ctx context.Context, room *domain.Room) error {
-	_, err := dao.db.NewInsert().Model(room).Exec(ctx)
+	_, err := dao.db.NewInsert(ctx).Model(room).Exec(ctx)
 
 	if e, ok := err.(pgdriver.Error); ok && e.IntegrityViolation() {
 		return customErrors.NewAlreadyExistsError("room already exists")
@@ -40,7 +40,7 @@ func (dao roomDAO) Create(ctx context.Context, room *domain.Room) error {
 func (dao roomDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Room, error) {
 	room := new(domain.Room)
 
-	err := dao.db.NewSelect().
+	err := dao.db.NewSelect(ctx).
 		Model(room).
 		Where("room.id = ?", id).
 		Relation("Hotel").
@@ -53,14 +53,14 @@ func (dao roomDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Room, err
 
 func (dao roomDAO) GetByHotelId(ctx context.Context, hotelId uuid.UUID) ([]*domain.Room, error) {
 	var rooms []*domain.Room
-	err := dao.db.NewSelect().Model(&rooms).Where("hotel_id = ?", hotelId).Relation("Hotel").Scan(ctx)
+	err := dao.db.NewSelect(ctx).Model(&rooms).Where("hotel_id = ?", hotelId).Relation("Hotel").Scan(ctx)
 
 	return rooms, err
 }
 
 func (dao roomDAO) GetByHotelIdFreeRooms(ctx context.Context, hotelId uuid.UUID) ([]*domain.Room, error) {
 	var rooms []*domain.Room
-	err := dao.db.NewSelect().
+	err := dao.db.NewSelect(ctx).
 		Model(&rooms).
 		Where("hotel_id = ?", hotelId).
 		Relation("Hotel").
@@ -75,7 +75,7 @@ func (dao roomDAO) GetByHotelIdFreeRooms(ctx context.Context, hotelId uuid.UUID)
 }
 
 func (dao roomDAO) Update(ctx context.Context, room *domain.Room) error {
-	_, err := dao.db.NewUpdate().Model(room).Where("id = ?", room.Id).Exec(ctx)
+	_, err := dao.db.NewUpdate(ctx).Model(room).Where("id = ?", room.Id).Exec(ctx)
 
 	return err
 }
@@ -83,7 +83,7 @@ func (dao roomDAO) Update(ctx context.Context, room *domain.Room) error {
 func (dao roomDAO) Delete(ctx context.Context, id uuid.UUID) error {
 	room := new(domain.Room)
 	room.Id = id
-	_, err := dao.db.NewDelete().Model(room).WherePK().Exec(ctx)
+	_, err := dao.db.NewDelete(ctx).Model(room).WherePK().Exec(ctx)
 
 	return err
 }

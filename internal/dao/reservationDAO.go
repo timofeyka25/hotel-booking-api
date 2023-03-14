@@ -3,10 +3,10 @@ package dao
 import (
 	"context"
 	"github.com/google/uuid"
-	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"hotel-booking-app/internal/domain"
 	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/db"
 )
 
 type ReservationDAO interface {
@@ -20,15 +20,15 @@ type ReservationDAO interface {
 }
 
 type reservationDAO struct {
-	db *bun.DB
+	db *db.TransactionRepository
 }
 
-func NewReservationDAO(db *bun.DB) *reservationDAO {
+func NewReservationDAO(db *db.TransactionRepository) *reservationDAO {
 	return &reservationDAO{db: db}
 }
 
 func (dao reservationDAO) Create(ctx context.Context, r *domain.Reservation) error {
-	_, err := dao.db.NewInsert().Model(r).Exec(ctx)
+	_, err := dao.db.NewInsert(ctx).Model(r).Exec(ctx)
 
 	if e, ok := err.(pgdriver.Error); ok && e.IntegrityViolation() {
 		return customErrors.NewAlreadyExistsError("reservation already exists")
@@ -40,7 +40,7 @@ func (dao reservationDAO) Create(ctx context.Context, r *domain.Reservation) err
 func (dao reservationDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Reservation, error) {
 	r := new(domain.Reservation)
 
-	err := dao.db.NewSelect().
+	err := dao.db.NewSelect(ctx).
 		Model(r).
 		Where("reservation.id = ?", id).
 		Relation("Room").
@@ -56,7 +56,7 @@ func (dao reservationDAO) GetByRoomAndUserId(
 ) ([]*domain.Reservation, error) {
 	var r []*domain.Reservation
 
-	err := dao.db.NewSelect().
+	err := dao.db.NewSelect(ctx).
 		Model(&r).
 		Where("user_id = ?", userId).
 		Where("room_id = ?", roomId).
@@ -70,7 +70,7 @@ func (dao reservationDAO) GetByRoomAndUserId(
 func (dao reservationDAO) GetByUserId(ctx context.Context, id uuid.UUID) ([]*domain.Reservation, error) {
 	var r []*domain.Reservation
 
-	err := dao.db.NewSelect().
+	err := dao.db.NewSelect(ctx).
 		Model(&r).
 		Where("reservation.user_id = ?", id).
 		Relation("Room").
@@ -84,7 +84,7 @@ func (dao reservationDAO) GetByUserId(ctx context.Context, id uuid.UUID) ([]*dom
 
 func (dao reservationDAO) GetAll(ctx context.Context) ([]*domain.Reservation, error) {
 	var r []*domain.Reservation
-	err := dao.db.NewSelect().
+	err := dao.db.NewSelect(ctx).
 		Model(&r).
 		Relation("Room").
 		Relation("Room.Hotel").
@@ -96,7 +96,7 @@ func (dao reservationDAO) GetAll(ctx context.Context) ([]*domain.Reservation, er
 }
 
 func (dao reservationDAO) Update(ctx context.Context, r *domain.Reservation) error {
-	_, err := dao.db.NewUpdate().Model(r).Where("id = ?", r.Id).Exec(ctx)
+	_, err := dao.db.NewUpdate(ctx).Model(r).Where("id = ?", r.Id).Exec(ctx)
 
 	return err
 }
@@ -104,7 +104,7 @@ func (dao reservationDAO) Update(ctx context.Context, r *domain.Reservation) err
 func (dao reservationDAO) Delete(ctx context.Context, id uuid.UUID) error {
 	r := new(domain.Reservation)
 	r.Id = id
-	_, err := dao.db.NewDelete().Model(r).WherePK().Exec(ctx)
+	_, err := dao.db.NewDelete(ctx).Model(r).WherePK().Exec(ctx)
 
 	return err
 }

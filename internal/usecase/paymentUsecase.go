@@ -6,6 +6,7 @@ import (
 	"hotel-booking-app/internal/dao"
 	"hotel-booking-app/internal/domain"
 	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/db"
 	"time"
 )
 
@@ -14,15 +15,21 @@ type PaymentUseCase interface {
 }
 
 type paymentUseCase struct {
-	paymentDAO     dao.PaymentDAO
-	reservationDAO dao.ReservationDAO
+	paymentDAO         dao.PaymentDAO
+	reservationDAO     dao.ReservationDAO
+	transactionManager *db.TransactionManager
 }
 
 func NewPaymentUseCase(
 	paymentDAO dao.PaymentDAO,
 	reservationDAO dao.ReservationDAO,
+	transactionManager *db.TransactionManager,
 ) *paymentUseCase {
-	return &paymentUseCase{paymentDAO: paymentDAO, reservationDAO: reservationDAO}
+	return &paymentUseCase{
+		paymentDAO:         paymentDAO,
+		reservationDAO:     reservationDAO,
+		transactionManager: transactionManager,
+	}
 }
 
 func (uc paymentUseCase) PayForReservation(ctx context.Context, params CreatePaymentParams) (uuid.UUID, error) {
@@ -43,11 +50,16 @@ func (uc paymentUseCase) PayForReservation(ctx context.Context, params CreatePay
 		return uuid.Nil, customErrors.NewStatusError("Wrong amount")
 	}
 	payment := domain.NewPayment(params.ReservationId, params.UserId, params.Amount)
-	if err = uc.paymentDAO.Create(ctx, payment); err != nil {
-		return uuid.Nil, err
-	}
 	reservation.PaymentStatus = domain.PAID
-	if err = uc.reservationDAO.Update(ctx, reservation); err != nil {
+	if err = uc.transactionManager.WithinTransaction(ctx, func(ctx context.Context) error {
+		if err = uc.paymentDAO.Create(ctx, payment); err != nil {
+			return err
+		}
+		if err = uc.reservationDAO.Update(ctx, reservation); err != nil {
+			return err
+		}
+		return nil
+	}); err != nil {
 		return uuid.Nil, err
 	}
 	return payment.Id, nil
