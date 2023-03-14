@@ -11,12 +11,12 @@ import (
 )
 
 type RoomDAO interface {
-	Create(context.Context, *domain.Room) error
-	GetById(context.Context, uuid.UUID) (*domain.Room, error)
-	GetByHotelId(context.Context, uuid.UUID) ([]*domain.Room, error)
-	GetByHotelIdFreeRooms(context.Context, uuid.UUID) ([]*domain.Room, error)
-	Update(context.Context, *domain.Room) error
-	Delete(context.Context, uuid.UUID) error
+	Create(ctx context.Context, room *domain.Room) error
+	GetById(ctx context.Context, id uuid.UUID) (*domain.Room, error)
+	GetByHotelId(ctx context.Context, hotelId uuid.UUID) ([]*domain.Room, error)
+	GetByHotelIdFreeRooms(ctx context.Context, hotelId uuid.UUID) ([]*domain.Room, error)
+	Update(ctx context.Context, room *domain.Room) error
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type roomDAO struct {

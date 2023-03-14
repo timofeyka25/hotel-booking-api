@@ -14,9 +14,9 @@ import (
 )
 
 type UserUseCase interface {
-	SignUp(context.Context, SignUpParams) (uuid.UUID, error)
-	SignIn(context.Context, SignInParams) (string, error)
-	GetUser(context.Context, string) (*domain.User, error)
+	SignUp(ctx context.Context, params SignUpParams) (uuid.UUID, error)
+	SignIn(ctx context.Context, params SignInParams) (string, error)
+	GetUser(ctx context.Context, email string) (*domain.User, error)
 }
 
 type userUseCase struct {

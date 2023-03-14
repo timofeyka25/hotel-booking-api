@@ -10,8 +10,8 @@ import (
 )
 
 type ReservationUseCase interface {
-	CreateReservation(context.Context, CreateReservationParams) (uuid.UUID, error)
-	GetAllUserReservations(context.Context, uuid.UUID) ([]*domain.Reservation, error)
+	CreateReservation(ctx context.Context, params CreateReservationParams) (uuid.UUID, error)
+	GetAllUserReservations(ctx context.Context, userId uuid.UUID) ([]*domain.Reservation, error)
 	GetAllReservations(ctx context.Context) ([]*domain.Reservation, error)
 	CancelUserReservation(ctx context.Context, reservationId, userId uuid.UUID) error
 	UpdateStatus(ctx context.Context, params UpdateReservationStatusParams) error

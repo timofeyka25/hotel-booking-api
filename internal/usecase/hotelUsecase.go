@@ -8,11 +8,11 @@ import (
 )
 
 type HotelUseCase interface {
-	AddHotel(context.Context, AddHotelParams) (uuid.UUID, error)
-	GetAllHotels(context.Context) ([]*domain.Hotel, error)
-	GetHotelById(context.Context, uuid.UUID) (*domain.Hotel, error)
-	UpdateHotel(context.Context, UpdateHotelParams) error
-	DeleteHotel(context.Context, uuid.UUID) error
+	AddHotel(ctx context.Context, params AddHotelParams) (uuid.UUID, error)
+	GetAllHotels(ctx context.Context) ([]*domain.Hotel, error)
+	GetHotelById(ctx context.Context, id uuid.UUID) (*domain.Hotel, error)
+	UpdateHotel(ctx context.Context, params UpdateHotelParams) error
+	DeleteHotel(ctx context.Context, id uuid.UUID) error
 }
 
 type hotelUseCase struct {

@@ -10,11 +10,11 @@ import (
 )
 
 type HotelDAO interface {
-	Create(context.Context, *domain.Hotel) error
-	GetById(context.Context, uuid.UUID) (*domain.Hotel, error)
-	GetAll(context.Context) ([]*domain.Hotel, error)
-	Update(context.Context, *domain.Hotel) error
-	Delete(context.Context, uuid.UUID) error
+	Create(ctx context.Context, hotel *domain.Hotel) error
+	GetById(ctx context.Context, id uuid.UUID) (*domain.Hotel, error)
+	GetAll(ctx context.Context) ([]*domain.Hotel, error)
+	Update(ctx context.Context, hotel *domain.Hotel) error
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type hotelDAO struct {

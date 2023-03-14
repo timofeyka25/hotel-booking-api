@@ -10,12 +10,12 @@ import (
 )
 
 type ReservationDAO interface {
-	Create(context.Context, *domain.Reservation) error
-	GetById(context.Context, uuid.UUID) (*domain.Reservation, error)
-	GetByRoomAndUserId(context.Context, uuid.UUID, uuid.UUID) ([]*domain.Reservation, error)
-	Update(context.Context, *domain.Reservation) error
-	Delete(context.Context, uuid.UUID) error
-	GetByUserId(context.Context, uuid.UUID) ([]*domain.Reservation, error)
+	Create(ctx context.Context, reservation *domain.Reservation) error
+	GetById(ctx context.Context, id uuid.UUID) (*domain.Reservation, error)
+	GetByRoomAndUserId(ctx context.Context, userID, roomId uuid.UUID) ([]*domain.Reservation, error)
+	Update(ctx context.Context, reservation *domain.Reservation) error
+	Delete(ctx context.Context, id uuid.UUID) error
+	GetByUserId(ctx context.Context, userId uuid.UUID) ([]*domain.Reservation, error)
 	GetAll(ctx context.Context) ([]*domain.Reservation, error)
 }
 

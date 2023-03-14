@@ -10,10 +10,10 @@ import (
 )
 
 type PaymentDAO interface {
-	Create(context.Context, *domain.Payment) error
-	GetById(context.Context, uuid.UUID) (*domain.Payment, error)
-	Update(context.Context, *domain.Payment) error
-	Delete(context.Context, uuid.UUID) error
+	Create(ctx context.Context, payment *domain.Payment) error
+	GetById(ctx context.Context, id uuid.UUID) (*domain.Payment, error)
+	Update(ctx context.Context, payment *domain.Payment) error
+	Delete(ctx context.Context, id uuid.UUID) error
 }
 
 type paymentDAO struct {
