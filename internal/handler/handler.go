@@ -13,17 +13,20 @@ type handler struct {
 	hotelHandler       *HotelHandler
 	roomHandler        *RoomHandler
 	reservationHandler *ReservationHandler
+	paymentHandler     *PaymentHandler
 }
 
 func NewHandler(userHandler *UserHandler,
 	hotelHandler *HotelHandler,
 	roomHandler *RoomHandler,
-	reservationHandler *ReservationHandler) *handler {
+	reservationHandler *ReservationHandler,
+	paymentHandler *PaymentHandler) *handler {
 	return &handler{
 		userHandler:        userHandler,
 		hotelHandler:       hotelHandler,
 		roomHandler:        roomHandler,
 		reservationHandler: reservationHandler,
+		paymentHandler:     paymentHandler,
 	}
 }
 
@@ -52,6 +55,7 @@ func (h *handler) InitRoutes(app *fiber.App) {
 	app.Get("/reservation/all", h.reservationHandler.GetAllUserReservations)
 	app.Get("/reservation/all/manager", h.isManager, h.reservationHandler.GetAllReservations)
 	app.Get("/reservation/:id/cancel", h.reservationHandler.CancelUserReservation)
+	app.Post("/reservation/:id/pay", h.paymentHandler.PayForReservation)
 	app.Put("/reservation/:id/status", h.isManager, h.reservationHandler.UpdateReservationStatus)
 
 	// swagger handler

@@ -79,6 +79,10 @@ func toUpdateReservationStatusParams(
 	}
 }
 
+func toCreatePaymentParams(reservationId, userId uuid.UUID, amount float64) usecase.CreatePaymentParams {
+	return usecase.CreatePaymentParams{ReservationId: reservationId, UserId: userId, Amount: amount}
+}
+
 func mapDtoHotel(hotel *domain.Hotel) *dto.HotelDTO {
 	return &dto.HotelDTO{
 		Id:          hotel.Id,

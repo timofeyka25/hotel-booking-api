@@ -19,7 +19,7 @@ import (
 )
 
 //	@title		Backend API
-//  @version 1.0
+// 	@version 1.0
 //	@host		localhost:8000
 //	@BasePath	/
 
@@ -48,23 +48,27 @@ func main() {
 	hotelDAO := dao.NewHotelDAO(db)
 	roomDAO := dao.NewRoomDAO(db)
 	reservationDAO := dao.NewReservationDAO(db)
+	paymentDAO := dao.NewPaymentDAO(db)
 
 	// init use cases
 	userUseCase := usecase.NewUserUseCase(userDao, roleDAO, jwtGenerator)
 	hotelUseCase := usecase.NewHotelUseCase(hotelDAO)
 	roomUseCase := usecase.NewRoomUseCase(roomDAO)
 	reservationUseCase := usecase.NewReservationUseCase(reservationDAO)
+	paymentUseCase := usecase.NewPaymentUseCase(paymentDAO, reservationDAO)
 
 	// init handlers
 	userHandler := handler.NewUserHandler(userUseCase, validate)
 	hotelHandler := handler.NewHotelHandler(hotelUseCase, validate)
 	roomHandler := handler.NewRoomHandler(roomUseCase, validate)
 	reservationHandler := handler.NewReservationHandler(reservationUseCase, validate)
+	paymentHandler := handler.NewPaymentHandler(paymentUseCase, validate)
 	handlers := handler.NewHandler(
 		userHandler,
 		hotelHandler,
 		roomHandler,
 		reservationHandler,
+		paymentHandler,
 	)
 
 	// init app

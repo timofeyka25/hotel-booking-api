@@ -42,7 +42,8 @@ func (dao reservationDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Re
 
 	err := dao.db.NewSelect().
 		Model(r).
-		Where("id = ?", id).
+		Where("reservation.id = ?", id).
+		Relation("Room").
 		Scan(ctx)
 	if err != nil {
 		return nil, err
