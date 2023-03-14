@@ -85,9 +85,9 @@ func (h *UserHandler) SignUp(ctx *fiber.Ctx) error {
 // @Tags Admin
 // @Accept json
 // @Produce json
-// @Success 200 {array} UserDTO
-// @Failure 401 {object} ErrorDTO
-// @Failure 500 {object} ErrorDTO
+// @Success 200 {array} dto.UserDTO
+// @Failure 401 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
 // @Router /users [get]
 func (h *UserHandler) GetUsersList(ctx *fiber.Ctx) error {
 	users, err := h.userUseCase.GetUsersList(ctx.Context())

@@ -32,7 +32,7 @@ func NewPaymentHandler(
 // @Accept json
 // @Produce json
 // @Param id path string true "Reservation ID"
-// @Param input body CreatePaymentDTO true "Payment details"
+// @Param input body dto.CreatePaymentDTO true "Payment details"
 // @Security ApiKeyAuth
 // @Success 200 {object} dto.ReturnIdDTO
 // @Failure 400 {object} dto.ErrorDTO
