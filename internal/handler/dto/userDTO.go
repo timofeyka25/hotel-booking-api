@@ -1,5 +1,7 @@
 package dto
 
+import "github.com/google/uuid"
+
 type SignInRequestDTO struct {
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6,max=255"`
@@ -13,4 +15,25 @@ type SignUpRequestDTO struct {
 	Name     string `json:"name" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6,max=255"`
+}
+
+type RoleDTO struct {
+	Id   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
+type UserDTO struct {
+	Id       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
+	Email    string    `json:"email"`
+	IsActive bool      `json:"is_active"`
+	Role     *RoleDTO  `json:"role"`
+}
+
+type IsActiveDTO struct {
+	IsActive bool `json:"is_active"`
+}
+
+type UpdateRoleDTO struct {
+	Role string `json:"role" validate:"required"`
 }

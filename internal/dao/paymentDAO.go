@@ -12,6 +12,7 @@ import (
 type PaymentDAO interface {
 	Create(ctx context.Context, payment *domain.Payment) error
 	GetById(ctx context.Context, id uuid.UUID) (*domain.Payment, error)
+	GetByUserId(ctx context.Context, userId uuid.UUID) ([]*domain.Payment, error)
 	Update(ctx context.Context, payment *domain.Payment) error
 	Delete(ctx context.Context, id uuid.UUID) error
 }
@@ -45,6 +46,19 @@ func (dao paymentDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.Paymen
 		return nil, err
 	}
 	return payment, nil
+}
+
+func (dao paymentDAO) GetByUserId(ctx context.Context, userId uuid.UUID) ([]*domain.Payment, error) {
+	var payments []*domain.Payment
+
+	err := dao.db.NewSelect(ctx).
+		Model(&payments).
+		Where("user_id = ?", userId).
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return payments, nil
 }
 
 func (dao paymentDAO) Update(ctx context.Context, payment *domain.Payment) error {

@@ -55,8 +55,16 @@ func (h *handler) InitRoutes(app *fiber.App) {
 	app.Get("/reservation/all", h.reservationHandler.GetAllUserReservations)
 	app.Get("/reservation/all/manager", h.isManager, h.reservationHandler.GetAllReservations)
 	app.Get("/reservation/:id/cancel", h.reservationHandler.CancelUserReservation)
-	app.Post("/reservation/:id/pay", h.paymentHandler.PayForReservation)
 	app.Put("/reservation/:id/status", h.isManager, h.reservationHandler.UpdateReservationStatus)
+
+	// payment handlers
+	app.Post("/reservation/:id/pay", h.paymentHandler.PayForReservation)
+	app.Get("/payment/all", h.paymentHandler.GetUserPayments)
+
+	// admin handlers
+	app.Get("/users", h.isAdmin, h.userHandler.GetUsersList)
+	app.Put("/user/:id/active", h.isAdmin, h.userHandler.ChangeUserActive)
+	app.Put("/user/:id/role", h.isAdmin, h.userHandler.ChangeUserRole)
 
 	// swagger handler
 	app.Get("/swagger/*", swagger.HandlerDefault)

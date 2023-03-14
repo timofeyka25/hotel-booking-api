@@ -15,6 +15,7 @@ type UserDAO interface {
 	GetByEmail(ctx context.Context, email string) (*domain.User, error)
 	Update(ctx context.Context, user *domain.User) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	GetUsers(ctx context.Context) ([]*domain.User, error)
 }
 
 type userDAO struct {
@@ -40,7 +41,7 @@ func (dao userDAO) GetById(ctx context.Context, id uuid.UUID) (*domain.User, err
 
 	err := dao.db.NewSelect(ctx).
 		Model(user).
-		Where("id = ?", id).
+		Where("\"user\".\"id\" = ?", id).
 		Relation("Role").
 		Scan(ctx)
 	if err != nil {
@@ -61,6 +62,21 @@ func (dao userDAO) GetByEmail(ctx context.Context, email string) (*domain.User, 
 		return nil, err
 	}
 	return user, nil
+}
+
+func (dao userDAO) GetUsers(ctx context.Context) ([]*domain.User, error) {
+	var users []*domain.User
+
+	err := dao.db.NewSelect(ctx).
+		Column("id", "name", "email", "is_active", "role_id").
+		Model(&users).
+		Relation("Role").
+		Scan(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	return users, nil
 }
 
 func (dao userDAO) Update(ctx context.Context, user *domain.User) error {

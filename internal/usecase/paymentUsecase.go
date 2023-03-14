@@ -12,6 +12,7 @@ import (
 
 type PaymentUseCase interface {
 	PayForReservation(ctx context.Context, params CreatePaymentParams) (uuid.UUID, error)
+	GetUserPayments(ctx context.Context, userId uuid.UUID) ([]*domain.Payment, error)
 }
 
 type paymentUseCase struct {
@@ -63,6 +64,10 @@ func (uc paymentUseCase) PayForReservation(ctx context.Context, params CreatePay
 		return uuid.Nil, err
 	}
 	return payment.Id, nil
+}
+
+func (uc paymentUseCase) GetUserPayments(ctx context.Context, userId uuid.UUID) ([]*domain.Payment, error) {
+	return uc.paymentDAO.GetByUserId(ctx, userId)
 }
 
 type CreatePaymentParams struct {

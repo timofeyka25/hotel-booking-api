@@ -83,6 +83,14 @@ func toCreatePaymentParams(reservationId, userId uuid.UUID, amount float64) usec
 	return usecase.CreatePaymentParams{ReservationId: reservationId, UserId: userId, Amount: amount}
 }
 
+func toUpdateUserStatusParams(userId uuid.UUID, isActive bool) usecase.UpdateUserActiveParams {
+	return usecase.UpdateUserActiveParams{UserId: userId, IsActive: isActive}
+}
+
+func toUpdateRoleParams(userId uuid.UUID, roleDto *dto.UpdateRoleDTO) usecase.UpdateUserRoleParams {
+	return usecase.UpdateUserRoleParams{UserId: userId, Role: roleDto.Role}
+}
+
 func mapDtoHotel(hotel *domain.Hotel) *dto.HotelDTO {
 	return &dto.HotelDTO{
 		Id:          hotel.Id,
@@ -136,4 +144,43 @@ func mapDtoReservations(reservations []*domain.Reservation) []*dto.ReservationDT
 		dtoReservations = append(dtoReservations, mapDtoReservation(reservation))
 	}
 	return dtoReservations
+}
+
+func mapDtoPayment(payment *domain.Payment) *dto.PaymentDTO {
+	return &dto.PaymentDTO{
+		Id:            payment.Id,
+		ReservationId: payment.ReservationId,
+		UserId:        payment.UserId,
+		Amount:        payment.Amount,
+		PaymentTime:   payment.PaymentTime,
+	}
+}
+
+func mapDtoPayments(payments []*domain.Payment) []*dto.PaymentDTO {
+	var dtoPayments []*dto.PaymentDTO
+	for _, payment := range payments {
+		dtoPayments = append(dtoPayments, mapDtoPayment(payment))
+	}
+	return dtoPayments
+}
+
+func mapDtoUser(user *domain.User) *dto.UserDTO {
+	return &dto.UserDTO{
+		Id:       user.Id,
+		Name:     user.Name,
+		Email:    user.Email,
+		IsActive: user.IsActive,
+		Role: &dto.RoleDTO{
+			Id:   user.Role.Id,
+			Name: user.Role.Name,
+		},
+	}
+}
+
+func mapDtoUsers(users []*domain.User) []*dto.UserDTO {
+	var dtoUsers []*dto.UserDTO
+	for _, user := range users {
+		dtoUsers = append(dtoUsers, mapDtoUser(user))
+	}
+	return dtoUsers
 }

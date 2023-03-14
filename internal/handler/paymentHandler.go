@@ -14,6 +14,31 @@ type PaymentHandler struct {
 	paymentUseCase usecase.PaymentUseCase
 }
 
+func NewPaymentHandler(
+	paymentUseCase usecase.PaymentUseCase,
+	validator *validator.Validate,
+) *PaymentHandler {
+	return &PaymentHandler{
+		paymentUseCase: paymentUseCase,
+		validator:      validator,
+	}
+}
+
+// PayForReservation
+//
+// @Summary Pay for reservation
+// @Description Pay for a reservation with the specified payment details.
+// @Tags Payment
+// @Accept json
+// @Produce json
+// @Param id path string true "Reservation ID"
+// @Param input body CreatePaymentDTO true "Payment details"
+// @Security ApiKeyAuth
+// @Success 200 {object} dto.ReturnIdDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 401 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /reservation/{id}/pay [post]
 func (h *PaymentHandler) PayForReservation(ctx *fiber.Ctx) error {
 	idDto := new(dto.GetByIdDTO)
 	paymentDto := new(dto.CreatePaymentDTO)
@@ -49,12 +74,27 @@ func (h *PaymentHandler) PayForReservation(ctx *fiber.Ctx) error {
 	return ctx.JSON(dto.ReturnIdDTO{Id: newId})
 }
 
-func NewPaymentHandler(
-	paymentUseCase usecase.PaymentUseCase,
-	validator *validator.Validate,
-) *PaymentHandler {
-	return &PaymentHandler{
-		paymentUseCase: paymentUseCase,
-		validator:      validator,
+// GetUserPayments
+//
+// @Summary Get user payments
+// @Description Returns a list of payments made by the authenticated user.
+// @Tags Payment
+// @Accept json
+// @Produce json
+// @Success 200 {array} dto.PaymentDTO
+// @Failure 400 {object} dto.ErrorDTO
+// @Failure 401 {object} dto.ErrorDTO
+// @Failure 500 {object} dto.ErrorDTO
+// @Router /payment/all [get]
+func (h *PaymentHandler) GetUserPayments(ctx *fiber.Ctx) error {
+	id := ctx.Cookies("id")
+	userId, err := uuid.Parse(id)
+	if err != nil {
+		return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
 	}
+	payments, err := h.paymentUseCase.GetUserPayments(ctx.Context(), userId)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(dto.ErrorDTO{Message: err.Error()})
+	}
+	return ctx.JSON(mapDtoPayments(payments))
 }

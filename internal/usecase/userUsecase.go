@@ -17,6 +17,9 @@ type UserUseCase interface {
 	SignUp(ctx context.Context, params SignUpParams) (uuid.UUID, error)
 	SignIn(ctx context.Context, params SignInParams) (string, error)
 	GetUser(ctx context.Context, email string) (*domain.User, error)
+	GetUsersList(ctx context.Context) ([]*domain.User, error)
+	UpdateUserActiveStatus(ctx context.Context, params UpdateUserActiveParams) error
+	UpdateUserRole(ctx context.Context, params UpdateUserRoleParams) error
 }
 
 type userUseCase struct {
@@ -79,6 +82,43 @@ func (uc userUseCase) GetUser(ctx context.Context, email string) (*domain.User, 
 	return user, nil
 }
 
+func (uc userUseCase) GetUsersList(ctx context.Context) ([]*domain.User, error) {
+	return uc.userDAO.GetUsers(ctx)
+}
+
+func (uc userUseCase) UpdateUserActiveStatus(ctx context.Context, params UpdateUserActiveParams) error {
+	user, err := uc.userDAO.GetById(ctx, params.UserId)
+	if err != nil {
+		return err
+	}
+	if user.IsActive == params.IsActive {
+		return customErrors.NewUpdateError("The user already has this status")
+	}
+	user.IsActive = params.IsActive
+	return uc.userDAO.Update(ctx, user)
+}
+
+func (uc userUseCase) UpdateUserRole(ctx context.Context, params UpdateUserRoleParams) error {
+	user, err := uc.userDAO.GetById(ctx, params.UserId)
+	if err != nil {
+		return err
+	}
+	if user.Role.Name == params.Role {
+		return customErrors.NewUpdateError("The user already has this role")
+	}
+	switch params.Role {
+	case domain.USER, domain.MANAGER, domain.ADMIN:
+		role, err := uc.roleDAO.GetByName(ctx, params.Role)
+		if err != nil {
+			return err
+		}
+		user.RoleId = role.Id
+	default:
+		return customErrors.NewUpdateError("Wrong role name")
+	}
+	return uc.userDAO.Update(ctx, user)
+}
+
 type SignUpParams struct {
 	Name     string
 	Email    string
@@ -88,4 +128,14 @@ type SignUpParams struct {
 type SignInParams struct {
 	Email    string
 	Password string
+}
+
+type UpdateUserActiveParams struct {
+	UserId   uuid.UUID
+	IsActive bool
+}
+
+type UpdateUserRoleParams struct {
+	UserId uuid.UUID
+	Role   string
 }
