@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/uptrace/bun/driver/pgdriver"
 	"hotel-booking-app/internal/domain"
-	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/custom_errors"
 	"hotel-booking-app/pkg/db"
 	"time"
 )
@@ -31,7 +31,7 @@ func (dao roomDAO) Create(ctx context.Context, room *domain.Room) error {
 	_, err := dao.db.NewInsert(ctx).Model(room).Exec(ctx)
 
 	if e, ok := err.(pgdriver.Error); ok && e.IntegrityViolation() {
-		return customErrors.NewAlreadyExistsError("room already exists")
+		return custom_errors.NewAlreadyExistsError("room already exists")
 	}
 
 	return err

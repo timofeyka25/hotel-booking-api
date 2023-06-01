@@ -1,4 +1,4 @@
-package customErrors
+package custom_errors
 
 type NotActiveError struct {
 	message string

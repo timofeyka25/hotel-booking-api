@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 	"hotel-booking-app/internal/dao"
 	"hotel-booking-app/internal/domain"
-	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/custom_errors"
 	"time"
 )
 
@@ -33,7 +33,7 @@ func (uc reservationUseCase) CreateReservation(ctx context.Context, params Creat
 	if reservations != nil {
 		for _, reservation := range reservations {
 			if reservation.CheckOutDate.After(time.Now()) && reservation.Status != domain.CANCELLED {
-				return uuid.Nil, customErrors.NewAlreadyReservedError("This room is already reserved by you")
+				return uuid.Nil, custom_errors.NewAlreadyReservedError("This room is already reserved by you")
 			}
 		}
 	}
@@ -63,10 +63,10 @@ func (uc reservationUseCase) CancelUserReservation(ctx context.Context, reservat
 		return err
 	}
 	if reservation.UserId != userId {
-		return customErrors.NewNotFoundError("You do not have this reservation")
+		return custom_errors.NewNotFoundError("You do not have this reservation")
 	}
 	if reservation.Status == domain.CANCELLED || reservation.Status == domain.COMPLETED {
-		return customErrors.NewStatusError("You cannot cancel this reservation")
+		return custom_errors.NewStatusError("You cannot cancel this reservation")
 	}
 	reservation.Status = domain.CANCELLED
 	return uc.reservationDAO.Update(ctx, reservation)
@@ -78,32 +78,32 @@ func (uc reservationUseCase) UpdateStatus(ctx context.Context, params UpdateRese
 		return err
 	}
 	if reservation.Status == params.Status {
-		return customErrors.NewStatusError("Status matches current reservation status")
+		return custom_errors.NewStatusError("Status matches current reservation status")
 	}
 	switch params.Status {
 	case domain.CONFIRMED:
 		if reservation.PaymentStatus != domain.PAID {
-			return customErrors.NewStatusError("The reservation must be paid for")
+			return custom_errors.NewStatusError("The reservation must be paid for")
 		}
 		if reservation.Status != domain.PENDING {
-			return customErrors.NewStatusError("The reservation status is no longer PENDING.")
+			return custom_errors.NewStatusError("The reservation status is no longer PENDING.")
 		}
 	case domain.COMPLETED, domain.UNFULFILLED:
 		if reservation.CheckOutDate.After(time.Now()) {
-			return customErrors.NewStatusError("The reservation has not yet been completed")
+			return custom_errors.NewStatusError("The reservation has not yet been completed")
 		}
 		if reservation.Status != domain.CONFIRMED {
-			return customErrors.NewStatusError("First you need to confirm this reservation")
+			return custom_errors.NewStatusError("First you need to confirm this reservation")
 		}
 	case domain.CANCELLED:
 		if reservation.Status != domain.PENDING {
-			return customErrors.NewStatusError("The reservation status is no longer PENDING.")
+			return custom_errors.NewStatusError("The reservation status is no longer PENDING.")
 		}
 	default:
 		if reservation.Status == domain.CANCELLED {
-			return customErrors.NewStatusError("The reservation already cancelled")
+			return custom_errors.NewStatusError("The reservation already cancelled")
 		}
-		return customErrors.NewStatusError("Wrong status")
+		return custom_errors.NewStatusError("Wrong status")
 	}
 	reservation.Status = params.Status
 	return uc.reservationDAO.Update(ctx, reservation)

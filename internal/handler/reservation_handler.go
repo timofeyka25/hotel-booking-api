@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"hotel-booking-app/internal/handler/dto"
 	"hotel-booking-app/internal/usecase"
-	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/custom_errors"
 )
 
 type ReservationHandler struct {
@@ -54,12 +54,12 @@ func (h *ReservationHandler) CreateReservation(ctx *fiber.Ctx) error {
 	userId := ctx.Cookies("id")
 	if userId == "" {
 		return ctx.Status(fiber.StatusUnauthorized).JSON(dto.ErrorDTO{
-			Message: customErrors.NewUnauthorizedError().Error()})
+			Message: custom_errors.NewUnauthorizedError().Error()})
 	}
 	id, err := h.reservationUseCase.CreateReservation(ctx.Context(),
 		toCreateReservationParams(uuid.MustParse(roomIdDto.Id), uuid.MustParse(userId), parsedDto))
 	if err != nil {
-		_, ok := err.(*customErrors.AlreadyReservedError)
+		_, ok := err.(*custom_errors.AlreadyReservedError)
 		if ok {
 			return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
 		}
@@ -171,7 +171,7 @@ func (h *ReservationHandler) UpdateReservationStatus(ctx *fiber.Ctx) error {
 		uuid.MustParse(idDto.Id),
 		updateDto,
 	)); err != nil {
-		_, ok := err.(*customErrors.StatusError)
+		_, ok := err.(*custom_errors.StatusError)
 		if ok {
 			return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
 		}

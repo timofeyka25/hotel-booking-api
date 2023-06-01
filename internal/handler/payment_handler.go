@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"hotel-booking-app/internal/handler/dto"
 	"hotel-booking-app/internal/usecase"
-	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/custom_errors"
 )
 
 type PaymentHandler struct {
@@ -65,7 +65,7 @@ func (h *PaymentHandler) PayForReservation(ctx *fiber.Ctx) error {
 		paymentDto.Amount,
 	))
 	if err != nil {
-		_, ok := err.(*customErrors.StatusError)
+		_, ok := err.(*custom_errors.StatusError)
 		if ok {
 			return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
 		}

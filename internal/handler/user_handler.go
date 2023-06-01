@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"hotel-booking-app/internal/handler/dto"
 	"hotel-booking-app/internal/usecase"
-	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/custom_errors"
 )
 
 type UserHandler struct {
@@ -39,7 +39,7 @@ func (h *UserHandler) SignIn(ctx *fiber.Ctx) error {
 	}
 	token, err := h.userUseCase.SignIn(ctx.Context(), toSignInParams(signInDto))
 	if err != nil {
-		_, ok := err.(*customErrors.NotActiveError)
+		_, ok := err.(*custom_errors.NotActiveError)
 		if ok {
 			return ctx.Status(fiber.StatusForbidden).JSON(dto.ErrorDTO{Message: err.Error()})
 		}
@@ -124,7 +124,7 @@ func (h *UserHandler) ChangeUserActive(ctx *fiber.Ctx) error {
 		ctx.Context(),
 		toUpdateUserStatusParams(uuid.MustParse(idDto.Id), isActiveDto.IsActive),
 	); err != nil {
-		_, ok := err.(*customErrors.UpdateError)
+		_, ok := err.(*custom_errors.UpdateError)
 		if ok {
 			return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
 		}
@@ -163,7 +163,7 @@ func (h *UserHandler) ChangeUserRole(ctx *fiber.Ctx) error {
 		ctx.Context(),
 		toUpdateRoleParams(uuid.MustParse(idDto.Id), roleDto),
 	); err != nil {
-		_, ok := err.(*customErrors.UpdateError)
+		_, ok := err.(*custom_errors.UpdateError)
 		if ok {
 			return ctx.Status(fiber.StatusBadRequest).JSON(dto.ErrorDTO{Message: err.Error()})
 		}

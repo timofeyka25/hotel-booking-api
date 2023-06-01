@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"github.com/golang-jwt/jwt"
-	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/custom_errors"
 )
 
 type TokenValidator struct {
@@ -26,11 +26,11 @@ func (v *TokenValidator) ValidateToken(token string) (*TokenParsedParams, error)
 		return []byte(v.secretKey), nil
 	})
 	if err != nil {
-		return nil, customErrors.NewUnauthorizedError()
+		return nil, custom_errors.NewUnauthorizedError()
 	}
 
 	if !parsed.Valid {
-		return nil, customErrors.NewUnauthorizedError()
+		return nil, custom_errors.NewUnauthorizedError()
 	}
 
 	return &TokenParsedParams{Id: claims.Id, Role: claims.Role}, nil

@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"hotel-booking-app/internal/dao"
 	"hotel-booking-app/internal/domain"
-	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/custom_errors"
 	"hotel-booking-app/pkg/hash"
 	"hotel-booking-app/pkg/jwt"
 	"time"
@@ -57,14 +57,14 @@ func (uc userUseCase) SignIn(ctx context.Context, params SignInParams) (string, 
 	}
 
 	if user == nil {
-		return "", customErrors.NewNotFoundError("user not found")
+		return "", custom_errors.NewNotFoundError("user not found")
 	}
 	if !hash.IsEqualWithHash(params.Password, user.PasswordHash) {
 		return "", errors.New("incorrect password")
 	}
 
 	if user.IsActive == false {
-		return "", customErrors.NewNotActiveError("This account is no longer active")
+		return "", custom_errors.NewNotActiveError("This account is no longer active")
 	}
 
 	return uc.tokenGenerator.GenerateNewAccessToken(jwt.Params{
@@ -80,7 +80,7 @@ func (uc userUseCase) GetUser(ctx context.Context, email string) (*domain.User, 
 		return nil, err
 	}
 	if user == nil {
-		return nil, customErrors.NewNotFoundError("user not found")
+		return nil, custom_errors.NewNotFoundError("user not found")
 	}
 
 	return user, nil
@@ -96,7 +96,7 @@ func (uc userUseCase) UpdateUserActiveStatus(ctx context.Context, params UpdateU
 		return err
 	}
 	if user.IsActive == params.IsActive {
-		return customErrors.NewUpdateError("The user already has this status")
+		return custom_errors.NewUpdateError("The user already has this status")
 	}
 	user.IsActive = params.IsActive
 	return uc.userDAO.Update(ctx, user)
@@ -108,7 +108,7 @@ func (uc userUseCase) UpdateUserRole(ctx context.Context, params UpdateUserRoleP
 		return err
 	}
 	if user.Role.Name == params.Role {
-		return customErrors.NewUpdateError("The user already has this role")
+		return custom_errors.NewUpdateError("The user already has this role")
 	}
 	switch params.Role {
 	case domain.USER, domain.MANAGER, domain.ADMIN:
@@ -118,7 +118,7 @@ func (uc userUseCase) UpdateUserRole(ctx context.Context, params UpdateUserRoleP
 		}
 		user.RoleId = role.Id
 	default:
-		return customErrors.NewUpdateError("Wrong role name")
+		return custom_errors.NewUpdateError("Wrong role name")
 	}
 	return uc.userDAO.Update(ctx, user)
 }

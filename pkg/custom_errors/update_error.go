@@ -1,4 +1,4 @@
-package customErrors
+package custom_errors
 
 type UpdateError struct {
 	message string

@@ -2,7 +2,7 @@ package dto
 
 import (
 	"github.com/google/uuid"
-	"hotel-booking-app/pkg/customErrors"
+	"hotel-booking-app/pkg/custom_errors"
 	"time"
 )
 
@@ -29,7 +29,7 @@ func (c *CreateReservationDTO) ParseAndValidate() (*CreateReservationParsedDTO, 
 	}
 	today := time.Now()
 	if checkInDate.Before(today) || checkOutDate.Before(today) || checkOutDate.Before(checkInDate) {
-		return nil, customErrors.NewValidationError(
+		return nil, custom_errors.NewValidationError(
 			"CheckInDate and CheckOutDate must be greater than today and CheckOutDate must be greater than CheckInDate")
 	}
 	return &CreateReservationParsedDTO{CheckInDate: checkInDate, CheckOutDate: checkOutDate}, nil
